@@ -48,11 +48,6 @@ before_script:
   - echo "memory_limit = ${memlimit}" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
   - echo 'always_populate_raw_post_data = -1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
 
-  # Init PHP
-  - phpenv rehash
-  - phpenv config-rm xdebug.ini || true
-  - echo 'memory_limit = 2048M' >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
-
   # Install composer dependencies
   - composer validate
   - if [[ $DB == PGSQL ]]; then composer require silverstripe/postgresql:^2 --no-update; fi
