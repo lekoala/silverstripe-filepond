@@ -21,9 +21,6 @@ This is provided by the FilePondFileExtension class.
       extensions:
         - LeKoala\FilePond\FilePondFileExtension
 
-This is *not enabled by default* because it's a really simple extension. If you already
-have an extension on the File DataObject, it might be easier to add it there.
-
 ## Temporary files
 
 Because files are upload in ajax, maybe they will never be used if the user never submit the form.

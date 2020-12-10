@@ -6,3 +6,6 @@ LeKoala\FilePond\FilePondField:
   auto_clear_threshold: null #defaults to 1 day in prod env
   enable_default_description: true
   enable_requirements: true
+SilverStripe\Assets\File:
+  extensions:
+    - LeKoala\FilePond\FilePondFileExtension
