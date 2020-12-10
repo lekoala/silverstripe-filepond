@@ -464,7 +464,7 @@ class FilePondField extends AbstractUploadField
         }
 
         // Update query to avoid fetching unecessary records
-        $tempFiles = $tempFiles->where("Created <= '" . date('Y-m-d H:i:s', $thresholdTime) . "'");
+        $tempFiles = $tempFiles->filter("Created:LessThan", date('Y-m-d H:i:s', $thresholdTime));
 
         $filesDeleted = [];
         foreach ($tempFiles as $tempFile) {

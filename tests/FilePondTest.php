@@ -174,8 +174,9 @@ class FilePondTest extends SapphireTest
 
         $result = FilePondField::clearTemporaryUploads();
         $this->assertCount(1, $result);
-        $this->assertNotEquals($tempFile->ID, $result[0]->ID);
-        $this->assertEquals($this->getTempFile()->ID, $result[0]->ID);
+
+        $this->assertNotEquals($tempFile->ID, $result[0]->ID, "It should not delete a recent temporary file");
+        $this->assertEquals($this->getTempFile()->ID, $result[0]->ID, "It should delete an old temporary file");
     }
 
     public function testCustomConfig()
