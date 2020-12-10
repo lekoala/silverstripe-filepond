@@ -1,0 +1,14 @@
+fr:
+  FilePondField:
+    ErrorMaxFilesReached:
+      one: 'Vous ne pouvez mettre en ligne que {count} fichier.'
+      other: 'Vous ne pouvez mettre en ligne que {count} fichiers.'
+    labelFileProcessing: Téléchargement
+    labelFileProcessingAborted: 'Téléchargement annulé'
+    labelFileProcessingComplete: 'Téléchargement completé'
+    labelIdle: 'Glisser et déposer ou <span class="filepond--label-action"> Parcourir </span>'
+    labelTapToCancel: 'Cliquer pour annuler'
+  ImprovedUploader:
+    ALLOWEXTENSION: 'Extensions autorisées: {ext}'
+    MAXRESOLUTION: 'Résolution max.: 2048x2048px'
+    MAXSIZE: 'Format max fichier: {size}'

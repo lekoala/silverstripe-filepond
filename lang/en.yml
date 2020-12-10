@@ -1,0 +1,14 @@
+en:
+  FilePondField:
+    ErrorMaxFilesReached:
+      one: 'You can only upload {count} file.'
+      other: 'You can only upload {count} files.'
+    labelFileProcessing: Uploading
+    labelFileProcessingAborted: 'Upload cancelled'
+    labelFileProcessingComplete: 'Upload complete'
+    labelIdle: 'Drag & Drop your files or <span class="filepond--label-action"> Browse </span>'
+    labelTapToCancel: 'tap to undo'
+  ImprovedUploader:
+    ALLOWEXTENSION: 'Allowed extensions: {ext}'
+    MAXRESOLUTION: 'Max resolution: 2048x2048px'
+    MAXSIZE: 'Max file size: {size}'

@@ -1,0 +1,14 @@
+nl:
+  FilePondField:
+    ErrorMaxFilesReached:
+      one: 'U kunt alleen {count} bestand uploaden.'
+      other: 'U kunt alleen {count} bestanden uploaden.'
+    labelFileProcessing: Uploading
+    labelFileProcessingAborted: 'Upload geannuleerd'
+    labelFileProcessingComplete: 'Upload voltooid'
+    labelIdle: 'Sleep en plaats of <span class="filepond--label-action"> Zoek </span>'
+    labelTapToCancel: 'Klik om ongedaan te maken'
+  ImprovedUploader:
+    ALLOWEXTENSION: 'Toegestane extensies: {ext}'
+    MAXRESOLUTION: 'Max resolutie: 2048x2048px'
+    MAXSIZE: 'Max documentgrootte: {size}'

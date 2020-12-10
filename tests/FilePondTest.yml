@@ -1,0 +1,28 @@
+'SilverStripe\Security\Member':
+  admin:
+    Email: admin@test.com
+'LeKoala\FilePond\Test\Test_Model':
+  demo:
+    Name: demo
+    ImageID: 0
+    FileID: 0
+'SilverStripe\Assets\Folder':
+  uploads:
+    Title: Uploads
+'SilverStripe\Assets\File':
+  temp:
+    Created: '2015-08-19 00:00:00'
+    LastUpdated: '2015-08-27 00:00:00'
+    Owner: =>SilverStripe\Security\Member.admin
+    Parent: =>SilverStripe\Assets\Folder.uploads
+    Name: temp.jpg
+    Title: A temp file
+    IsTemporary: 1
+  regular:
+    IsTemporary: 0
+    Created: '2015-08-19 00:00:00'
+    LastUpdated: '2015-08-27 00:00:00'
+    Owner: =>SilverStripe\Security\Member.admin
+    Parent: =>SilverStripe\Assets\Folder.uploads
+    Name: regular.jpg
+    Title: A regular file

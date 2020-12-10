@@ -1,0 +1,157 @@
+# SilverStripe FilePond module
+
+[![Build Status](https://travis-ci.org/lekoala/silverstripe-filepond.svg?branch=master)](https://travis-ci.org/lekoala/silverstripe-filepond/)
+[![scrutinizer](https://scrutinizer-ci.com/g/lekoala/silverstripe-filepond/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/lekoala/silverstripe-filepond/)
+[![Code coverage](https://codecov.io/gh/lekoala/silverstripe-filepond/branch/master/graph/badge.svg)](https://codecov.io/gh/lekoala/silverstripe-filepond)
+
+## Intro
+
+Allow usage of [FilePond](https://pqina.nl/filepond/) fields in the front end.
+
+## File extension
+
+In order for this uploader to work properly, your files need to have a IsTemporary boolean field.
+This is provided by the FilePondFileExtension class.
+
+    SilverStripe\Assets\File:
+      extensions:
+        - LeKoala\FilePond\FilePondFileExtension
+
+This is *not enabled by default* because it's a really simple extension. If you already
+have an extension on the File DataObject, it might be easier to add it there.
+
+## Temporary files
+
+Because files are upload in ajax, maybe they will never be used if the user never submit the form.
+
+In order to avoid storing unecessary files, all files uploaded are flagged by default as `IsTemporary`.
+
+All files are then unflagged as `IsTemporary` when the form is submitted and saved into a record.
+
+Although this should all work automatically, if you manually use the FilePondField without saving into
+a record you need to manually unflag the files yourself.
+
+By default, old temporary files are deleted automatically by the FilePondField::clearTemporaryUploads method.
+You can control how often files are deleted based on your upload frequencies (see `auto_clear_threshold`).
+Since the files are deleted on upload, it might take some time if you have a lot of files to delete.
+
+If that's the case, maybe it's better to run a cron task every 5 minutes that calls this method in order
+to avoid burdening the end user. Have a look at my [simple jobs module](https://github.com/lekoala/silverstripe-simple-jobs) to do that.
+
+## Tracking files
+
+Most of the time, uploaded files are linked to a record. The primary mechanism of moving uploaded files out of the `IsTemporary` state is
+done through the `FilePondField::saveInto` method.
+
+In order to maximize tracking, the `FilePondFileExtension` also add `ObjectID` and `ObjectClass` fields to the `File` table.
+
+This allows to associate files easily to your `DataObject` classes without adding specific `has_many` or `many_many` relations, which either create extra tables or required reciprocal relationships.
+
+Instead, while moving files out of `IsTemporary` state, we also associate the current form record to the file.
+
+## Configuring field instances
+
+This module configure FilePondFields based on a config data attribute. It will generate most of the config by itself, however
+you can customize frontend behaviour with the following method:
+
+    $pond->addFilePondConfig('allowDrop', false);
+
+Please refer to FilePond documentation to see what are the public properties.
+
+## Validation
+
+### For files
+
+By default, this module validate file size and file extension in the front end thanks to the FilePond plugins.
+
+You can read more here:
+
+https://pqina.nl/filepond/docs/patterns/plugins/file-validate-size/
+https://pqina.nl/filepond/docs/patterns/plugins/file-validate-type/
+
+### For images
+
+We also installed the image size validation plugin. This allows to avoid user uploading incorrect format that might be difficult
+to crop or resize (GD crashing anyone?).
+
+You can define custom image sizes on your records based on convention. For example, for a squared avatar.
+
+    MyRecord:
+      images_sizes:
+        Avatar: [512,512]
+
+If defined, the field description and the validation will be automatically applied.
+
+You can read more here:
+
+https://pqina.nl/filepond/docs/patterns/plugins/image-validate-size/
+
+## Renaming and organizing files
+
+One thing is certain, your user tends to name files incorrectly. The end result is that your asset folder
+is full of stuff with crazy names.
+
+In order to bring some sanity to your asset folder, this module work in two ways.
+
+### Default folder
+
+The default behaviour from SilverStripe is to upload everything in the Uploads folder. But wouldn't it be more useful to organize things based on your class ? Project files go to Project folder. Sounds good?
+
+Great, because this is exactly how it works.
+
+By default, if a record is associated to the form, all files will be uploaded to NameOfTheClass/NameOfTheUploader.
+
+This behaviour is fully configurable. If your `DataObject` implements a `getFolderName` method, you can retain paths based on your own logic (for example NameOfTheClass/IDOfTheRecord).
+By default, I don't recommend to store files based on records IDs because : 1. IDs are not known for new records, 2. If you have lots of records, you will have lots of folders that are slow to parse and display.
+
+### Renaming files according to a pattern
+
+Let's say your users can upload avatars. But it wouldn't be too good to allow crazy names in a public facing website right?
+
+Don't worry, I'm here to help:
+
+    $pond = new FilePondField('Avatar');
+    $pond->setRenamePattern("{field}_{date}.{extension}");
+
+By setting a rename pattern, you can rename dynamically the files *before they are saved to the asset store* (which is really great).
+
+The following pattern will rename the file to Avatar_yyyymmdd.jpg. You can also set static parts, for example:
+
+    $pond = new FilePondField('Avatar');
+    $pond->setRenamePattern($member->Username . "_avatar.{extension}");
+
+## Requirements
+
+In order to provide a working out of the box experience, js requirements are loaded from cdn
+and the FilePondFields are initialized by the FilePondField.js script.
+
+However, if you happen to include FilePond on your own, you can disable this behaviour by setting
+`enable_requirements` to `false`. You can have a look at FilePondField.js to see how to initialize the script properly.
+
+## Config flags
+
+FilePondField has the following configurable options
+
+    LeKoala\FilePond\FilePondField:
+      auto_clear_temp_folder: true
+      auto_clear_threshold: null #defaults to 1 day in prod env
+      enable_default_description: true
+      enable_requirements: true
+
+## Todo
+
+- More tests and refactoring
+- Modular plugins
+- Admin usage?
+
+## Sponsored by
+
+This module is kindly sponsored by [RESTRUCT](restruct.nl)
+
+## Compatibility
+
+Tested with 4.5 but should work on any 4.x projects
+
+## Maintainer
+
+LeKoala - thomas@lekoala.be
