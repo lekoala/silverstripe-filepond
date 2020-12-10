@@ -10,5 +10,6 @@ en:
     labelTapToCancel: 'tap to undo'
   ImprovedUploader:
     ALLOWEXTENSION: 'Allowed extensions: {ext}'
-    MAXRESOLUTION: 'Max resolution: 2048x2048px'
+    MINRESOLUTION: 'Min resolution: {size}px'
+    MAXRESOLUTION: 'Max resolution: {size}px'
     MAXSIZE: 'Max file size: {size}'

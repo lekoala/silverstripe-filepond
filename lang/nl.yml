@@ -10,5 +10,6 @@ nl:
     labelTapToCancel: 'Klik om ongedaan te maken'
   ImprovedUploader:
     ALLOWEXTENSION: 'Toegestane extensies: {ext}'
-    MAXRESOLUTION: 'Max resolutie: 2048x2048px'
+    MINRESOLUTION: 'Min resolutie: {size}px'
+    MAXRESOLUTION: 'Max resolutie: {size}px'
     MAXSIZE: 'Max documentgrootte: {size}'

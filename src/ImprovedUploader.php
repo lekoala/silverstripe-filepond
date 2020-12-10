@@ -64,18 +64,17 @@ trait ImprovedUploader
             $desc .= '; ';
 
             // do we have a preferred size set on the record?
-            $preferredSize = false;
             if ($record) {
                 $sizes = $record->config()->image_sizes;
                 if ($sizes && isset($sizes[$name])) {
                     // It is an array with two keys
                     $size = $sizes[$name][0] . 'x' . $sizes[$name][1];
-                    $desc .= _t('ImprovedUploader.RECOMMENDEDSIZE', 'Recommended resolution: ' . $size . 'px');
-                    $preferredSize = true;
+                    if (isset($sizes[$name][2]) && $sizes[$name][2] == 'max') {
+                        $desc .= _t('ImprovedUploader.MAXRESOLUTION', 'Maximum resolution: {size}px', ['size' => $size]);
+                    } else {
+                        $desc .= _t('ImprovedUploader.MINRESOLUTION', 'Minimum resolution: {size}px', ['size' => $size]);
+                    }
                 }
-            }
-            if (!$preferredSize) {
-                $desc .= _t('ImprovedUploader.MAXRESOLUTION', 'Max resolution: 2048x2048px');
             }
         }
 
@@ -101,7 +100,7 @@ trait ImprovedUploader
         }
         // Have a sane default for others
         $class = (new ReflectionClass($this->record))->getShortName();
-        $name = str_replace('[]', '', $this->getName());
+        $name = $this->getSafeName();
         return $class . '/' . $name;
     }
 
@@ -123,7 +122,7 @@ trait ImprovedUploader
         $filename = pathinfo($originalName, PATHINFO_FILENAME);
         $extension = pathinfo($originalName, PATHINFO_EXTENSION);
 
-        $field = str_replace('[]', '', $this->getName());
+        $field = $this->getSafeName();
 
         $map = [
             '{name}' => $name,
@@ -179,6 +178,16 @@ trait ImprovedUploader
         }
         $this->renamePattern = $renamePattern;
         return $this;
+    }
+
+    /**
+     * Get safe name even for multi uploads
+     *
+     * @return string
+     */
+    public function getSafeName()
+    {
+        return str_replace('[]', '', $this->getName());
     }
 
     /**

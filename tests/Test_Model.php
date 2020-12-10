@@ -14,10 +14,12 @@ class Test_Model extends DataObject implements TestOnly
     ];
     private static $has_one = [
         "Image" => Image::class,
+        "SmallImage" => Image::class,
         "File" => File::class,
     ];
     private static $image_sizes = [
-        "Image" => [1080, 1080]
+        "Image" => [1080, 1080],
+        "SmallImage" => [512, 512, 'max']
     ];
     private static $table_name = 'Model';
 }

@@ -8,6 +8,10 @@
 
 Allow usage of [FilePond](https://pqina.nl/filepond/) fields in the front end.
 
+Use as a regular UploadField and let it do its magic!
+
+    $pond = new FilePondField('Image');
+
 ## File extension
 
 In order for this uploader to work properly, your files need to have a IsTemporary boolean field.
@@ -74,11 +78,15 @@ https://pqina.nl/filepond/docs/patterns/plugins/file-validate-type/
 We also installed the image size validation plugin. This allows to avoid user uploading incorrect format that might be difficult
 to crop or resize (GD crashing anyone?).
 
-You can define custom image sizes on your records based on convention. For example, for a squared avatar.
+You can define custom image sizes on your records based on convention. For example, for a squared avatar and a large image.
 
     MyRecord:
       images_sizes:
-        Avatar: [512,512]
+        Avatar: [512,512,'max']
+        LargeImage: [1080,1080]
+
+Parameters are width, height. You can set a 3rd parameter to 'max' to ensure the file is below this size.
+By default, the size should be minimum the configured size.
 
 If defined, the field description and the validation will be automatically applied.
 

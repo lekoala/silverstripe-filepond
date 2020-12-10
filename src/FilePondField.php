@@ -121,6 +121,23 @@ class FilePondField extends AbstractUploadField
             'server' => $this->getServerOptions(),
             'files' => $this->getExistingUploadsData(),
         ];
+
+        // image validation
+        $record = $this->getForm()->getRecord();
+        if ($record) {
+            $sizes = $record->config()->image_sizes;
+            $name = $this->getSafeName();
+            if ($sizes && isset($sizes[$name])) {
+                if (isset($sizes[$name][2]) && $sizes[$name][2] == 'max') {
+                    $config['imageValidateSizeMaxWidth'] = $sizes[$name][0];
+                    $config['imageValidateSizeMaxHeight'] = $sizes[$name][1];
+                } else {
+                    $config['imageValidateSizeMinWidth'] = $sizes[$name][0];
+                    $config['imageValidateSizeMinHeight'] = $sizes[$name][1];
+                }
+            }
+        }
+
         $config = array_merge($config, $i18nConfig, $this->filePondConfig);
 
         return $config;
@@ -163,7 +180,7 @@ class FilePondField extends AbstractUploadField
      */
     public function getServerOptions()
     {
-        if (!$this->form) {
+        if (!$this->getForm()) {
             throw new LogicException(
                 'Field must be associated with a form to call getServerOptions(). Please use $field->setForm($form);'
             );
@@ -191,8 +208,9 @@ class FilePondField extends AbstractUploadField
      */
     protected function getLinkParameters($action)
     {
-        $token = $this->getForm()->getSecurityToken()->getValue();
-        $record = $this->getForm()->getRecord();
+        $form = $this->getForm();
+        $token = $form->getSecurityToken()->getValue();
+        $record = $form->getRecord();
 
         $headers = [
             'X-SecurityID' => $token

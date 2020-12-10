@@ -98,6 +98,14 @@ class FilePondTest extends SapphireTest
         $pond->setName("Image");
         $pond->Field(); // mock call to trigger default
         $this->assertContains("1080x1080px", $pond->getDescription());
+        $this->assertContains("min", strtolower($pond->getDescription()));
+
+        // can set a max res
+        $pond = $this->getPond();
+        $pond->setName("SmallImage");
+        $pond->Field(); // mock call to trigger default
+        $this->assertContains("512x512px", $pond->getDescription());
+        $this->assertContains("max", strtolower($pond->getDescription()));
 
         // we don't specify extensions by default
         $pond = $this->getPond();

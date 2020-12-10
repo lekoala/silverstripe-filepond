@@ -10,5 +10,6 @@ fr:
     labelTapToCancel: 'Cliquer pour annuler'
   ImprovedUploader:
     ALLOWEXTENSION: 'Extensions autorisées: {ext}'
-    MAXRESOLUTION: 'Résolution max.: 2048x2048px'
+    MINRESOLUTION: 'Résolution min.: {size}px'
+    MAXRESOLUTION: 'Résolution max.: {size}px'
     MAXSIZE: 'Format max fichier: {size}'

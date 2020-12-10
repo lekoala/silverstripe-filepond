@@ -367,8 +367,7 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
                 'Field must be associated with a form to call Link(). Please use $field->setForm($form);'
             );
         }
-        // Safely replace name in case of multiple uploads
-        $name = str_replace('[]', '', $this->getName());
+        $name = $this->getSafeName();
         $link = Controller::join_links($this->form->FormAction(), 'field/' . $name, $action);
         $this->extend('updateLink', $link, $action);
         return $link;
