@@ -1,6 +1,6 @@
 # SilverStripe FilePond module
 
-[![Build Status](https://travis-ci.org/lekoala/silverstripe-filepond.svg?branch=master)](https://travis-ci.org/lekoala/silverstripe-filepond/)
+[![Build Status](https://travis-ci.com/lekoala/silverstripe-filepond.svg?branch=master)](https://travis-ci.com/lekoala/silverstripe-filepond/)
 [![scrutinizer](https://scrutinizer-ci.com/g/lekoala/silverstripe-filepond/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/lekoala/silverstripe-filepond/)
 [![Code coverage](https://codecov.io/gh/lekoala/silverstripe-filepond/branch/master/graph/badge.svg)](https://codecov.io/gh/lekoala/silverstripe-filepond)
 
