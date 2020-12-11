@@ -1,7 +1,7 @@
 'SilverStripe\Security\Member':
   admin:
     Email: admin@test.com
-'LeKoala\FilePond\Test\Test_Model':
+'LeKoala\FilePond\Test\Test_FilePondModel':
   demo:
     Name: demo
     ImageID: 0

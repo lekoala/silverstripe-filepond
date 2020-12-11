@@ -7,7 +7,7 @@ use SilverStripe\Assets\Image;
 use SilverStripe\Dev\TestOnly;
 use SilverStripe\ORM\DataObject;
 
-class Test_Model extends DataObject implements TestOnly
+class Test_FilePondModel extends DataObject implements TestOnly
 {
     private static $db = [
         "Name" => "Varchar",
@@ -21,5 +21,5 @@ class Test_Model extends DataObject implements TestOnly
         "Image" => [1080, 1080],
         "SmallImage" => [512, 512, 'max']
     ];
-    private static $table_name = 'Model';
+    private static $table_name = 'FilePondModel';
 }

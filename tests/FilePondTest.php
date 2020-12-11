@@ -25,7 +25,7 @@ class FilePondTest extends SapphireTest
     protected static $fixture_file = 'FilePondTest.yml';
 
     protected static $extra_dataobjects = array(
-        Test_Model::class,
+        Test_FilePondModel::class,
     );
 
     public function setUp()
@@ -53,7 +53,7 @@ class FilePondTest extends SapphireTest
 
     public function getTestModel()
     {
-        return $this->objFromFixture(Test_Model::class, 'demo');
+        return $this->objFromFixture(Test_FilePondModel::class, 'demo');
     }
 
     public function getAdminMember()
