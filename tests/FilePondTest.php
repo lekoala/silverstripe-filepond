@@ -137,7 +137,7 @@ class FilePondTest extends SapphireTest
     public function testGetDefaultFolderName()
     {
         $pond = $this->getPond();
-        $this->assertEquals("Test_Model/TestUpload", $pond->getFolderName());
+        $this->assertEquals("Test_FilePondModel/TestUpload", $pond->getFolderName());
     }
 
     public function testRenamePattern()
