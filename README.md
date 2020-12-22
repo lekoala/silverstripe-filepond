@@ -35,6 +35,7 @@ a record you need to manually unflag the files yourself.
 By default, old temporary files are deleted automatically by the FilePondField::clearTemporaryUploads method.
 You can control how often files are deleted based on your upload frequencies (see `auto_clear_threshold`).
 Since the files are deleted on upload, it might take some time if you have a lot of files to delete.
+This is disabled by default and you need to enable it with `auto_clear_temp_folder` set to `true`
 
 If that's the case, maybe it's better to run a cron task every 5 minutes that calls this method in order
 to avoid burdening the end user. Have a look at my [simple jobs module](https://github.com/lekoala/silverstripe-simple-jobs) to do that.
