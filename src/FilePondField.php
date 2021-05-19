@@ -42,6 +42,30 @@ class FilePondField extends AbstractUploadField
      * @config
      * @var boolean
      */
+    private static $enable_validation = true;
+
+    /**
+     * @config
+     * @var boolean
+     */
+    private static $enable_poster = false;
+
+    /**
+     * @config
+     * @var boolean
+     */
+    private static $enable_image = false;
+
+    /**
+     * @config
+     * @var boolean
+     */
+    private static $enable_polyfill = true;
+
+    /**
+     * @config
+     * @var boolean
+     */
     private static $enable_default_description = true;
 
     /**
@@ -287,26 +311,43 @@ class FilePondField extends AbstractUploadField
         return $existingUploads;
     }
 
+    /**
+     * Requirements are NOT versioned since filepond is regularly updated
+     *
+     * @return void
+     */
     public static function Requirements()
     {
         // Polyfill to ensure max compatibility
-        Requirements::javascript("https://unpkg.com/filepond-polyfill@1.0.4/dist/filepond-polyfill.min.js");
-        // File validation plugins
-        Requirements::javascript("https://unpkg.com/filepond-plugin-file-validate-type@1.2.5/dist/filepond-plugin-file-validate-type.min.js");
-        Requirements::javascript("https://unpkg.com/filepond-plugin-file-validate-size@2.2.2/dist/filepond-plugin-file-validate-size.min.js");
-        // Image validation plugins
-        Requirements::javascript("https://unpkg.com/filepond-plugin-image-validate-size@1.2.4/dist/filepond-plugin-image-validate-size.js");
+        if (self::config()->enable_polyfill) {
+            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-polyfill/dist/filepond-polyfill.min.js");
+        }
+
+        // File/image validation plugins
+        if (self::config()->enable_validation) {
+            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js");
+            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js");
+            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-validate-size/dist/filepond-plugin-image-validate-size.js");
+        }
+
         // Poster plugins
-        // Requirements::javascript("https://unpkg.com/filepond-plugin-file-metadata@1.0.2/dist/filepond-plugin-file-metadata.min.js");
-        // Requirements::css("https://unpkg.com/filepond-plugin-file-poster@1.0.0/dist/filepond-plugin-file-poster.min.css");
-        // Requirements::javascript("https://unpkg.com/filepond-plugin-file-poster@1.0.0/dist/filepond-plugin-file-poster.min.js");
+        if (self::config()->enable_poster) {
+            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-file-metadata/dist/filepond-plugin-file-metadata.min.js");
+            Requirements::css("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.css");
+            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.js");
+        }
+
         // Image plugins
-        // Requirements::javascript("https://unpkg.com/filepond-plugin-image-exif-orientation@1.0.9/dist/filepond-plugin-image-exif-orientation.js");
-        // Requirements::css("https://unpkg.com/filepond-plugin-image-preview@2.0.1/dist/filepond-plugin-image-preview.min.css");
-        // Requirements::javascript("https://unpkg.com/filepond-plugin-image-preview@2.0.1/dist/filepond-plugin-image-preview.min.js");
+        if (self::config()->enable_image) {
+            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.js");
+            Requirements::css("https://cdn.jsdelivr.net/gh/pqina/unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css");
+            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js");
+        }
+
         // Base elements
-        Requirements::css("https://unpkg.com/filepond@4.23.1/dist/filepond.css");
-        Requirements::javascript("https://unpkg.com/filepond@4.23.1/dist/filepond.js");
+        Requirements::css("https://cdn.jsdelivr.net/gh/pqina/filepond/dist/filepond.css");
+        Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond/dist/filepond.js");
+
         // Our custom init
         Requirements::javascript('lekoala/silverstripe-filepond:javascript/FilePondField.js');
     }
