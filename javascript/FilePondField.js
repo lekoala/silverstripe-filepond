@@ -1,16 +1,35 @@
-/* global FilePond, FilePondPluginFileValidateSize, FilePondPluginFileValidateType, FilePondPluginImageValidateSize */
-document.addEventListener("DOMContentLoaded", function () {
-    FilePond.registerPlugin(FilePondPluginFileValidateSize);
-    FilePond.registerPlugin(FilePondPluginFileValidateType);
-    FilePond.registerPlugin(FilePondPluginImageValidateSize);
-    // FilePond.registerPlugin(FilePondPluginFileMetadata);
-    // FilePond.registerPlugin(FilePondPluginFilePoster);
-    // FilePond.registerPlugin(FilePondPluginImageExifOrientation);
-    // FilePond.registerPlugin(FilePondPluginImagePreview);
+/* global FilePond, FilePondPluginFileValidateSize, FilePondPluginFileValidateType, FilePondPluginImageValidateSize, FilePondPluginFileMetadata, FilePondPluginFilePoster, FilePondPluginImageExifOrientation, FilePondPluginImagePreview */
+
+function initFilePond() {
+    if (typeof FilePondPluginFileValidateSize !== "undefined") {
+        FilePond.registerPlugin(FilePondPluginFileValidateSize);
+    }
+    if (typeof FilePondPluginFileValidateType !== "undefined") {
+        FilePond.registerPlugin(FilePondPluginFileValidateType);
+    }
+    if (typeof FilePondPluginImageValidateSize !== "undefined") {
+        FilePond.registerPlugin(FilePondPluginImageValidateSize);
+    }
+    if (typeof FilePondPluginFileMetadata !== "undefined") {
+        FilePond.registerPlugin(FilePondPluginFileMetadata);
+    }
+    if (typeof FilePondPluginFilePoster !== "undefined") {
+        FilePond.registerPlugin(FilePondPluginFilePoster);
+    }
+    if (typeof FilePondPluginImageExifOrientation !== "undefined") {
+        FilePond.registerPlugin(FilePondPluginImageExifOrientation);
+    }
+    if (typeof FilePondPluginImagePreview !== "undefined") {
+        FilePond.registerPlugin(FilePondPluginImagePreview);
+    }
 
     FilePond.setOptions({
-        credits: false
+        credits: false,
     });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    initFilePond();
 
     // Attach filepond to all related inputs
     var anchors = document.querySelectorAll('input[type="file"].filepond');
@@ -19,6 +38,8 @@ document.addEventListener("DOMContentLoaded", function () {
         var pond = FilePond.create(el);
         var config = JSON.parse(el.dataset.config);
         for (var key in config) {
+            // We can set the properties directly in the instance
+            // @link https://pqina.nl/filepond/docs/patterns/api/filepond-instance/#properties
             pond[key] = config[key];
         }
     }

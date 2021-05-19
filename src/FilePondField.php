@@ -139,12 +139,16 @@ class FilePondField extends AbstractUploadField
         $config = [
             'name' => $name, // This will also apply to the hidden fields
             'allowMultiple' => $multiple,
-            'acceptedFileTypes' => $this->getAcceptedFileTypes(),
             'maxFiles' => $this->getAllowedMaxFileNumber(),
             'maxFileSize' => $this->getMaxFileSize(),
             'server' => $this->getServerOptions(),
             'files' => $this->getExistingUploadsData(),
         ];
+
+        $acceptedFileTypes = $this->getAcceptedFileTypes();
+        if (!empty($acceptedFileTypes)) {
+            $config['acceptedFileTypes'] = array_values($acceptedFileTypes);
+        }
 
         // image validation
         $record = $this->getForm()->getRecord();
