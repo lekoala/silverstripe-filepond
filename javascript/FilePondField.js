@@ -1,6 +1,11 @@
 /* global FilePond, FilePondPluginFileValidateSize, FilePondPluginFileValidateType, FilePondPluginImageValidateSize, FilePondPluginFileMetadata, FilePondPluginFilePoster, FilePondPluginImageExifOrientation, FilePondPluginImagePreview */
 
+var filepondIsInitialized = false;
+var filepondMaxTries = 5;
 function initFilePond() {
+    if (filepondIsInitialized) {
+        return;
+    }
     if (typeof FilePondPluginFileValidateSize !== "undefined") {
         FilePond.registerPlugin(FilePondPluginFileValidateSize);
     }
@@ -26,13 +31,18 @@ function initFilePond() {
     FilePond.setOptions({
         credits: false,
     });
+
+    filepondIsInitialized = true;
 }
-
-document.addEventListener("DOMContentLoaded", function () {
-    initFilePond();
-
+function attachFilePond() {
     // Attach filepond to all related inputs
     var anchors = document.querySelectorAll('input[type="file"].filepond');
+    if (!anchors.length && filepondMaxTries > 0) {
+        setTimeout(function () {
+            filepondMaxTries--;
+            attachFilePond();
+        }, 250);
+    }
     for (var i = 0; i < anchors.length; i++) {
         var el = anchors[i];
         var pond = FilePond.create(el);
@@ -43,4 +53,9 @@ document.addEventListener("DOMContentLoaded", function () {
             pond[key] = config[key];
         }
     }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    initFilePond();
+    attachFilePond();
 });

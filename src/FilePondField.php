@@ -363,7 +363,7 @@ class FilePondField extends AbstractUploadField
 
         // In the cms, init will not be triggered
         if (self::config()->enable_ajax_init && Director::is_ajax()) {
-            Requirements::javascript('lekoala/silverstripe-filepond:javascript/FilePondField-init.js');
+            Requirements::javascript('lekoala/silverstripe-filepond:javascript/FilePondField-init.js?t=' . time());
         }
     }
 
