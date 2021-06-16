@@ -66,6 +66,12 @@ class FilePondField extends AbstractUploadField
      * @config
      * @var boolean
      */
+    private static $enable_ajax_init = true;
+
+    /**
+     * @config
+     * @var boolean
+     */
     private static $enable_default_description = true;
 
     /**
@@ -354,6 +360,11 @@ class FilePondField extends AbstractUploadField
 
         // Our custom init
         Requirements::javascript('lekoala/silverstripe-filepond:javascript/FilePondField.js');
+
+        // In the cms, init will not be triggered
+        if (self::config()->enable_ajax_init && Director::is_ajax()) {
+            Requirements::javascript('lekoala/silverstripe-filepond:javascript/FilePondField-init.js');
+        }
     }
 
     public function FieldHolder($properties = array())
