@@ -29,7 +29,8 @@ class FilePondField extends AbstractUploadField
      * @var array
      */
     private static $allowed_actions = [
-        'upload'
+        'upload',
+        'chunk',
     ];
 
     /**
@@ -92,6 +93,11 @@ class FilePondField extends AbstractUploadField
     protected $filePondConfig = [];
 
     /**
+     * @var bool
+     */
+    protected $chunkUploads = false;
+
+    /**
      * Set a custom config value for this field
      *
      * @link https://pqina.nl/filepond/docs/patterns/api/filepond-instance/#properties
@@ -113,6 +119,26 @@ class FilePondField extends AbstractUploadField
     public function getCustomFilePondConfig()
     {
         return $this->filePondConfig;
+    }
+    /**
+     * Get the value of chunkUploads
+     * @return bool
+     */
+    public function getChunkUploads()
+    {
+        return $this->chunkUploads;
+    }
+
+    /**
+     * Set the value of chunkUploads
+     *
+     * @param bool $chunkUploads
+     * @return $this
+     */
+    public function setChunkUploads($chunkUploads)
+    {
+        $this->chunkUploads = $chunkUploads;
+        return $this;
     }
 
     /**
@@ -150,6 +176,10 @@ class FilePondField extends AbstractUploadField
             'server' => $this->getServerOptions(),
             'files' => $this->getExistingUploadsData(),
         ];
+        if ($this->chunkUploads) {
+            $config['chunkUploads'] = true;
+            $config['chunkForce'] = true;
+        }
 
         $acceptedFileTypes = $this->getAcceptedFileTypes();
         if (!empty($acceptedFileTypes)) {
@@ -219,11 +249,17 @@ class FilePondField extends AbstractUploadField
                 'Field must be associated with a form to call getServerOptions(). Please use $field->setForm($form);'
             );
         }
-        return [
-            'process' => $this->getUploadEnabled() ? $this->getLinkParameters('upload') : null,
+        $endpoint = $this->chunkUploads ? 'chunk' : 'upload';
+        $server = [
+            'process' => $this->getUploadEnabled() ? $this->getLinkParameters($endpoint) : null,
             'fetch' => null,
             'revert' => null,
         ];
+        if ($this->chunkUploads) {
+            $server['fetch'] =  $this->getLinkParameters($endpoint . "?fetch=");
+            $server['patch'] =  $this->getLinkParameters($endpoint . "?patch=");
+        }
+        return $server;
     }
 
     /**
@@ -388,16 +424,6 @@ class FilePondField extends AbstractUploadField
      */
     public function prepareUpload(HTTPRequest $request)
     {
-        if ($this->isDisabled() || $this->isReadonly()) {
-            throw new RuntimeException("Field is disabled or readonly");
-        }
-
-        // CSRF check
-        $token = $this->getForm()->getSecurityToken();
-        if (!$token->checkRequest($request)) {
-            throw new RuntimeException("Invalid token");
-        }
-
         $name = $this->getName();
         $tmpFile = $request->postVar($name);
         if (!$tmpFile) {
@@ -414,6 +440,55 @@ class FilePondField extends AbstractUploadField
         }
 
         return $tmpFile;
+    }
+
+    /**
+     * @param HTTPRequest $request
+     * @return void
+     */
+    protected function securityChecks(HTTPRequest $request)
+    {
+        if ($this->isDisabled() || $this->isReadonly()) {
+            throw new RuntimeException("Field is disabled or readonly");
+        }
+
+        // CSRF check
+        $token = $this->getForm()->getSecurityToken();
+        if (!$token->checkRequest($request)) {
+            throw new RuntimeException("Invalid token");
+        }
+    }
+
+    /**
+     * @param File $file
+     * @param HTTPRequest $request
+     * @return void
+     */
+    protected function setFileDetails(File $file, HTTPRequest $request)
+    {
+        // Mark as temporary until properly associated with a record
+        // Files will be unmarked later on by saveInto method
+        $file->IsTemporary = true;
+
+        // We can also track the record
+        $RecordID = $request->getHeader('X-RecordID');
+        $RecordClassName = $request->getHeader('X-RecordClassName');
+        if (!$file->ObjectID) {
+            $file->ObjectID = $RecordID;
+        }
+        if (!$file->ObjectClass) {
+            $file->ObjectClass = $RecordClassName;
+        }
+
+        if ($file->isChanged()) {
+            // If possible, prevent creating a version for no reason
+            // @link https://docs.silverstripe.org/en/4/developer_guides/model/versioning/#writing-changes-to-a-versioned-dataobject
+            if ($file->hasExtension(Versioned::class)) {
+                $file->writeWithoutVersion();
+            } else {
+                $file->write();
+            }
+        }
     }
 
     /**
@@ -434,6 +509,7 @@ class FilePondField extends AbstractUploadField
     public function upload(HTTPRequest $request)
     {
         try {
+            $this->securityChecks($request);
             $tmpFile = $this->prepareUpload($request);
         } catch (Exception $ex) {
             return $this->httpError(400, $ex->getMessage());
@@ -449,29 +525,7 @@ class FilePondField extends AbstractUploadField
 
         // File can be an AssetContainer and not a DataObject
         if ($file instanceof DataObject) {
-            // Mark as temporary until properly associated with a record
-            // Files will be unmarked later on by saveInto method
-            $file->IsTemporary = true;
-
-            // We can also track the record
-            $RecordID = $request->getHeader('X-RecordID');
-            $RecordClassName = $request->getHeader('X-RecordClassName');
-            if (!$file->ObjectID) {
-                $file->ObjectID = $RecordID;
-            }
-            if (!$file->ObjectClass) {
-                $file->ObjectClass = $RecordClassName;
-            }
-
-            if ($file->isChanged()) {
-                // If possible, prevent creating a version for no reason
-                // @link https://docs.silverstripe.org/en/4/developer_guides/model/versioning/#writing-changes-to-a-versioned-dataobject
-                if ($file->hasExtension(Versioned::class)) {
-                    $file->writeWithoutVersion();
-                } else {
-                    $file->write();
-                }
-            }
+            $this->setFileDetails($file, $request);
         }
 
         $this->getUpload()->clearErrors();
@@ -486,6 +540,124 @@ class FilePondField extends AbstractUploadField
         // server returns unique location id 12345 in text/plain response
         $response = new HTTPResponse($fileId);
         $response->addHeader('Content-Type', 'text/plain');
+        return $response;
+    }
+
+    /**
+     * @link https://pqina.nl/filepond/docs/api/server/#process-chunks
+     * @param HTTPRequest $request
+     * @return void
+     */
+    public function chunk(HTTPRequest $request)
+    {
+        try {
+            $this->securityChecks($request);
+        } catch (Exception $ex) {
+            return $this->httpError(400, $ex->getMessage());
+        }
+
+        $method = $request->httpMethod();
+
+        // The random token is returned as a query string
+        $id = $request->getVar('patch');
+
+        // FilePond will send a POST request (without file) to start a chunked transfer,
+        // expecting to receive a unique transfer id in the response body, it'll add the Upload-Length header to this request.
+        if ($method == "POST") {
+            // Initial post payload doesn't contain name
+            $file = new File();
+            $this->setFileDetails($file, $request);
+            $fileId = $file->ID;
+            $this->trackFileID($fileId);
+            $response = new HTTPResponse($fileId, 200);
+            $response->addHeader('Content-Type', 'text/plain');
+            return $response;
+        }
+
+        // FilePond will send a HEAD request to determine which chunks have already been uploaded,
+        // expecting the file offset of the next expected chunk in the Upload-Offset response header.
+        if ($method == "HEAD") {
+            $nextOffset = 0;
+
+            //TODO: iterate over temp files and check next offset
+            $response = new HTTPResponse($nextOffset, 200);
+            $response->addHeader('Content-Type', 'text/plain');
+            return $response;
+        }
+
+        // FilePond will send a PATCH request to push a chunk to the server.
+        // Each of these requests is accompanied by a Content-Type, Upload-Offset, Upload-Name, and Upload-Length header.
+        if ($method != "PATCH") {
+            return $this->httpError(400, "Invalid method");
+        }
+
+        // The name of the file being transferred
+        $uploadName = $request->getHeader('Upload-Name');
+        // The total size of the file being transferred
+        $offset = $request->getHeader('Upload-Offset');
+        // The offset of the chunk being transferred
+        $length = $request->getHeader('Upload-Length');
+
+        // location of patch files
+        $filePath = TEMP_PATH . "/filepond-" . $id;
+
+        // should be numeric values, else exit
+        if (!is_numeric($offset) || !is_numeric($length)) {
+            return $this->httpError(400, "Invalid offset or length");
+        }
+
+        // write patch file for this request
+        file_put_contents($filePath . '.patch.' . $offset, $request->getBody());
+
+        // calculate total size of patches
+        $size = 0;
+        $patch = glob($filePath . '.patch.*');
+        foreach ($patch as $filename) {
+            $size += filesize($filename);
+        }
+        // if total size equals length of file we have gathered all patch files
+        if ($size >= $length) {
+            // create output file
+            $outputFile = fopen($filePath, 'wb');
+            // write patches to file
+            foreach ($patch as $filename) {
+                // get offset from filename
+                list($dir, $offset) = explode('.patch.', $filename, 2);
+                // read patch and close
+                $patchFile = fopen($filename, 'rb');
+                $patchContent = fread($patchFile, filesize($filename));
+                fclose($patchFile);
+
+                // apply patch
+                fseek($outputFile, $offset);
+                fwrite($outputFile, $patchContent);
+            }
+            // remove patches
+            foreach ($patch as $filename) {
+                unlink($filename);
+            }
+            // done with file
+            fclose($outputFile);
+
+            // Finalize real filename
+            $realFilename = $this->getFolderName() . "/" . $uploadName;
+            if ($this->renamePattern) {
+                $realFilename = $this->changeFilenameWithPattern(
+                    $realFilename,
+                    $this->renamePattern
+                );
+            }
+
+            // write output file to asset store
+            $file = $this->getFileByID($id);
+            if (!$file) {
+                return $this->httpError("File $id not found");
+            }
+            $file->setFromLocalFile($filePath);
+            $file->setFilename($realFilename);
+            $file->write();
+        }
+        $response = new HTTPResponse('', 204);
         return $response;
     }
 
