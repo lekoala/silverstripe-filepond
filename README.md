@@ -155,15 +155,15 @@ FilePondField has the following configurable options
 
 ```yml
 LeKoala\FilePond\FilePondField:
-    auto_clear_temp_folder: true
-    auto_clear_threshold: null #defaults to 1 day in prod env
-    enable_default_description: true
-    enable_requirements: true
-    enable_validation: true
-    enable_poster: true
-    enable_image: true
-    enable_polyfill: true
-    enable_ajax_init: true
+  auto_clear_temp_folder: true
+  auto_clear_threshold: null #defaults to 1 day in prod env
+  enable_default_description: true
+  enable_requirements: true
+  enable_validation: true
+  enable_poster: true
+  enable_image: true
+  enable_polyfill: true
+  enable_ajax_init: true
 ```
 
 ## Todo
