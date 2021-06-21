@@ -10,16 +10,20 @@ Allow usage of [FilePond](https://pqina.nl/filepond/) fields in the front end.
 
 Use as a regular UploadField and let it do its magic!
 
-    $pond = new FilePondField('Image');
+```php
+$pond = new FilePondField('Image');
+```
 
 ## File extension
 
 In order for this uploader to work properly, your files need to have a IsTemporary boolean field.
 This is provided by the FilePondFileExtension class.
 
-    SilverStripe\Assets\File:
-      extensions:
-        - LeKoala\FilePond\FilePondFileExtension
+```yml
+SilverStripe\Assets\File:
+  extensions:
+    - LeKoala\FilePond\FilePondFileExtension
+```
 
 ## Temporary files
 
@@ -56,7 +60,9 @@ Instead, while moving files out of `IsTemporary` state, we also associate the cu
 This module configure FilePondFields based on a config data attribute. It will generate most of the config by itself, however
 you can customize frontend behaviour with the following method:
 
-    $pond->addFilePondConfig('allowDrop', false);
+```php
+$pond->addFilePondConfig('allowDrop', false);
+```
 
 Please refer to FilePond documentation to see what are the public properties.
 
@@ -78,10 +84,12 @@ to crop or resize (GD crashing anyone?).
 
 You can define custom image sizes on your records based on convention. For example, for a squared avatar and a large image.
 
-    MyRecord:
-      images_sizes:
-        Avatar: [512,512,'max']
-        LargeImage: [1080,1080]
+```yml
+MyRecord:
+    images_sizes:
+    Avatar: [512,512,'max']
+    LargeImage: [1080,1080]
+```
 
 Parameters are width, height. You can set a 3rd parameter to 'max' to ensure the file is below this size.
 By default, the size should be minimum the configured size.
@@ -116,15 +124,19 @@ Let's say your users can upload avatars. But it wouldn't be too good to allow cr
 
 Don't worry, I'm here to help:
 
-    $pond = new FilePondField('Avatar');
-    $pond->setRenamePattern("{field}_{date}.{extension}");
+```php
+$pond = new FilePondField('Avatar');
+$pond->setRenamePattern("{field}_{date}.{extension}");
+```
 
 By setting a rename pattern, you can rename dynamically the files *before they are saved to the asset store* (which is really great).
 
 The following pattern will rename the file to Avatar_yyyymmdd.jpg. You can also set static parts, for example:
 
-    $pond = new FilePondField('Avatar');
-    $pond->setRenamePattern($member->Username . "_avatar.{extension}");
+```php
+$pond = new FilePondField('Avatar');
+$pond->setRenamePattern($member->Username . "_avatar.{extension}");
+```
 
 ## Requirements
 
@@ -134,21 +146,29 @@ and the FilePondFields are initialized by the FilePondField.js script.
 However, if you happen to include FilePond on your own, you can disable this behaviour by setting
 `enable_requirements` to `false`. You can have a look at FilePondField.js to see how to initialize the script properly.
 
+There is an additionnal little javascript file to help with dealing with init after an ajax like (like in the Admin).
+It is enabled by default and controlled by the `enable_ajax_init` flag.
+
 ## Config flags
 
 FilePondField has the following configurable options
 
-    LeKoala\FilePond\FilePondField:
-      auto_clear_temp_folder: true
-      auto_clear_threshold: null #defaults to 1 day in prod env
-      enable_default_description: true
-      enable_requirements: true
+```yml
+LeKoala\FilePond\FilePondField:
+    auto_clear_temp_folder: true
+    auto_clear_threshold: null #defaults to 1 day in prod env
+    enable_default_description: true
+    enable_requirements: true
+    enable_validation: true
+    enable_poster: true
+    enable_image: true
+    enable_polyfill: true
+    enable_ajax_init: true
+```
 
 ## Todo
 
 - More tests and refactoring
-- Modular plugins
-- Admin usage?
 
 ## Sponsored by
 
@@ -156,7 +176,7 @@ This module is kindly sponsored by [RESTRUCT](restruct.nl)
 
 ## Compatibility
 
-Tested with 4.5 but should work on any 4.x projects
+Tested with 4.5 to 4.8 but should work on any 4.x projects
 
 ## Maintainer
 
