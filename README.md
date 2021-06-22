@@ -142,6 +142,15 @@ $pond = new FilePondField('Avatar');
 $pond->setRenamePattern($member->Username . "_avatar.{extension}");
 ```
 
+## Chunked uploads
+
+If you need to upload large videos, you can use `setChunkUploads`. File will be uploaded in chunks of 5mb and then merged on the last upload.
+
+```php
+$fields->push($Video = new FilePondField("Video"));
+$Video->setChunkUploads(true);
+```
+
 ## Requirements
 
 In order to provide a working out of the box experience, js requirements are loaded from cdn
