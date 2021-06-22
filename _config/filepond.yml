@@ -7,6 +7,6 @@ LeKoala\FilePond\FilePondField:
   enable_default_description: true
   enable_requirements: true
 SilverStripe\Assets\File:
-  enable_auto_thumbnail: false
+  enable_auto_thumbnails: false
   extensions:
     - LeKoala\FilePond\FilePondFileExtension
