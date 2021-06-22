@@ -21,12 +21,12 @@ This is provided by the FilePondFileExtension class.
 
 ```yml
 SilverStripe\Assets\File:
-  enable_auto_thumbnail: false
+  enable_auto_thumbnails: false
   extensions:
     - LeKoala\FilePond\FilePondFileExtension
 ```
 
-You can of course implement your own extension. As a bonus, you can toggle the `enable_auto_thumbnail`
+You can of course implement your own extension. As a bonus, you can toggle the `enable_auto_thumbnails`
 to `true` in order to get thumbnails for images in the cms.
 
 ## Temporary files
