@@ -5,6 +5,7 @@ namespace LeKoala\FilePond;
 use SilverStripe\Assets\File;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\AssetAdmin\Controller\AssetAdmin;
 
 class FilePondFileExtension extends DataExtension
 {
@@ -32,5 +33,16 @@ class FilePondFileExtension extends DataExtension
             'ObjectID' => $record->ID,
             'ObjectClass' => get_class($record),
         ])->exclude('IsTemporary', 1);
+    }
+
+    /**
+     * Called by Upload::loadIntoFile
+     * @return void
+     */
+    public function onAfterUpload()
+    {
+        if (File::config()->enable_auto_thumbnail) {
+            AssetAdmin::create()->generateThumbnails($this->owner);
+        }
     }
 }
