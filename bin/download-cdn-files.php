@@ -1,5 +1,9 @@
 <?php
 
+if (php_sapi_name() != "cli") {
+    die("This script must run from cli");
+}
+
 $files = [];
 $files[] = "https://cdn.jsdelivr.net/gh/pqina/filepond-polyfill/dist/filepond-polyfill.min.js";
 $files[] = "https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js";
