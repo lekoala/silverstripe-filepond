@@ -54,8 +54,14 @@ function attachFilePond() {
         }
     }
 }
-
 document.addEventListener("DOMContentLoaded", function () {
+    if (filepondIsInitialized) {
+        return;
+    }
+    initFilePond();
+    attachFilePond();
+});
+document.addEventListener("DOMNodesInserted", function () {
     initFilePond();
     attachFilePond();
 });
