@@ -185,6 +185,10 @@ It is enabled by default and controlled by the `enable_ajax_init` flag.
 If for some reason you use a custom endpoint for your FilePond, you can use the `setCustomServerConfig`. You can pass
 an array of options (for simple configs) or a string that should be the name of a global js handler.
 
+## Simpler SilverStripe support
+
+If you use Simpler SilverStripe, this module will use `DOMNodesInserted` and disable custom ajax support.
+
 ## Config flags
 
 FilePondField has the following configurable options
