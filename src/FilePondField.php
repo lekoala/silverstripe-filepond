@@ -767,16 +767,15 @@ class FilePondField extends AbstractUploadField
             $file->setFromLocalFile($filePath);
             $file->setFilename($realFilename);
             $file->Title = $uploadName;
-            // Is an image ?
-            $imageExtensions = File::get_category_extensions('image/supported');
-            if (in_array(pathinfo($realFilename, PATHINFO_EXTENSION), $imageExtensions)) {
-                $file->setClassName(Image::class);
-            }
+            // Set proper class
+            $relationClass = File::get_class_for_file_extension(
+                File::get_file_extension($realFilename)
+            );
+            $file->setClassName($relationClass);
             $file->write();
-            if (in_array(pathinfo($realFilename, PATHINFO_EXTENSION), $imageExtensions)) {
-                // Reload file instance
-                $file = Image::get()->byID($id);
-            }
+            // Reload file instance to get the right class
+            // it is not cached so we should get a fresh record
+            $file = $this->getFileByID($id);
             // since we don't go through our upload object, call extension manually
             $file->extend('onAfterUpload');
         }
