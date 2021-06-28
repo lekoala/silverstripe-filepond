@@ -8,6 +8,7 @@ use RuntimeException;
 use SilverStripe\Assets\File;
 use SilverStripe\ORM\SS_List;
 use SilverStripe\Assets\Image;
+use SilverStripe\Core\Convert;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
@@ -181,6 +182,7 @@ class FilePondField extends AbstractUploadField
     {
         $this->addFilePondConfig('chunkUploads', true);
         $this->addFilePondConfig('chunkForce', true);
+        $this->addFilePondConfig('chunkSize', $this->computeMaxChunkSize());
         return $this;
     }
 
@@ -250,6 +252,20 @@ class FilePondField extends AbstractUploadField
         $config = array_merge($config, $i18nConfig, $this->filePondConfig);
 
         return $config;
+    }
+
+    /**
+     * Compute best size for chunks based on server settings
+     *
+     * @return int
+     */
+    protected function computeMaxChunkSize()
+    {
+        $maxUpload = Convert::memstring2bytes(ini_get('upload_max_filesize'));
+        $maxPost = Convert::memstring2bytes(ini_get('post_max_size'));
+
+        // ~90%, allow some overhead
+        return round(min($maxUpload, $maxPost) * 0.9);
     }
 
     /**
@@ -707,6 +723,12 @@ class FilePondField extends AbstractUploadField
             }
             $file->setFromLocalFile($filePath);
             $file->setFilename($realFilename);
+            $file->Title = $uploadName;
+            // Is an image ?
+            $imageExtensions = File::get_category_extensions('image/supported');
+            if (in_array(pathinfo($realFilename, PATHINFO_EXTENSION), $imageExtensions)) {
+                $file->setClassName(Image::class);
+            }
             $file->write();
         }
         $response = new HTTPResponse('', 204);
@@ -733,6 +755,9 @@ class FilePondField extends AbstractUploadField
         }
 
         $fileID = (int) $request->getBody();
+        if (!in_array($fileID, $this->getTrackedIDs())) {
+            return $this->httpError(400, "Invalid ID");
+        }
         $file = File::get()->byID($fileID);
         if (!$file->IsTemporary) {
             return $this->httpError(400, "Invalid file");
