@@ -34,6 +34,7 @@ class FilePondField extends AbstractUploadField
     private static $allowed_actions = [
         'upload',
         'chunk',
+        'revert',
     ];
 
     /**
@@ -164,7 +165,10 @@ class FilePondField extends AbstractUploadField
      */
     public function getChunkUploads()
     {
-        return $this->getFilePondConfig('chunkUploads');
+        if (!isset($this->filePondConfig['chunkUploads'])) {
+            return false;
+        }
+        return $this->filePondConfig['chunkUploads'];
     }
 
     /**
@@ -294,9 +298,9 @@ class FilePondField extends AbstractUploadField
         $server = [
             'process' => $this->getUploadEnabled() ? $this->getLinkParameters($endpoint) : null,
             'fetch' => null,
-            'revert' => null,
+            'revert' => $this->getUploadEnabled() ? $this->getLinkParameters('revert') : null,
         ];
-        if ($this->getChunkUploads()) {
+        if ($this->getUploadEnabled() && $this->getChunkUploads()) {
             $server['fetch'] =  $this->getLinkParameters($endpoint . "?fetch=");
             $server['patch'] =  $this->getLinkParameters($endpoint . "?patch=");
         }
@@ -706,6 +710,38 @@ class FilePondField extends AbstractUploadField
             $file->write();
         }
         $response = new HTTPResponse('', 204);
+        return $response;
+    }
+
+    /**
+     * @link https://pqina.nl/filepond/docs/api/server/#revert
+     * @param HTTPRequest $request
+     * @return void
+     */
+    public function revert(HTTPRequest $request)
+    {
+        try {
+            $this->securityChecks($request);
+        } catch (Exception $ex) {
+            return $this->httpError(400, $ex->getMessage());
+        }
+
+        $method = $request->httpMethod();
+
+        if ($method != "DELETE") {
+            return $this->httpError(400, "Invalid method");
+        }
+
+        $fileID = (int) $request->getBody();
+        $file = File::get()->byID($fileID);
+        if (!$file->IsTemporary) {
+            return $this->httpError(400, "Invalid file");
+        }
+        if (!$file->canDelete()) {
+            return $this->httpError(400, "Cannot delete file");
+        }
+        $file->delete();
+        $response = new HTTPResponse('', 200);
         return $response;
     }
 
