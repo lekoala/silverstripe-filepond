@@ -41,8 +41,8 @@ class FilePondFileExtension extends DataExtension
      */
     public function onAfterUpload()
     {
-        if (File::config()->enable_auto_thumbnails) {
-            AssetAdmin::create()->generateThumbnails($this->owner);
+        if (FilePondField::config()->enable_auto_thumbnails) {
+            $thumbs = AssetAdmin::create()->generateThumbnails($this->owner);
         }
     }
 }

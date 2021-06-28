@@ -194,7 +194,7 @@ trait ImprovedUploader
      * A simple alias that makes the IDE happy
      *
      * @param int $ID
-     * @return File
+     * @return File|Image
      */
     protected function getFileByID($ID)
     {

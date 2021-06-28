@@ -21,9 +21,10 @@ This is provided by the FilePondFileExtension class.
 
 ```yml
 SilverStripe\Assets\File:
-  enable_auto_thumbnails: false
   extensions:
     - LeKoala\FilePond\FilePondFileExtension
+LeKoala\FilePond\FilePondField:
+  enable_auto_thumbnails: true
 ```
 
 You can of course implement your own extension. As a bonus, you can toggle the `enable_auto_thumbnails`
@@ -70,6 +71,21 @@ $pond->addFilePondConfig('allowDrop', false);
 
 Please refer to FilePond documentation to see what are the public properties.
 
+## Poster images
+
+You can enable dedicated plugins
+
+```yml
+LeKoala\FilePond\FilePondField:
+  enable_image: true
+  enable_poster: true
+  enable_auto_thumbnails: true
+```
+
+These modules enable poster support to display nices images attached to the upload field
+
+![poster](docs/poster-example.jpg "poster")
+
 ## Validation
 
 ### For files
@@ -90,7 +106,7 @@ You can define custom image sizes on your records based on convention. For examp
 
 ```yml
 MyRecord:
-    images_sizes:
+  images_sizes:
     Avatar: [512,512,'max']
     LargeImage: [1080,1080]
 ```
@@ -179,6 +195,9 @@ LeKoala\FilePond\FilePondField:
   enable_ajax_init: true
   chunk_by_default: false
   use_cdn: true
+  enable_auto_thumbnails: true
+  poster_width: true
+  poster_height: true
 ```
 
 ## Todo

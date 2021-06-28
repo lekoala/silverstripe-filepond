@@ -106,6 +106,12 @@ class FilePondField extends AbstractUploadField
 
     /**
      * @config
+     * @var boolean
+     */
+    private static $enable_auto_thumbnails = false;
+
+    /**
+     * @config
      * @var int
      */
     private static $poster_width = 352;
@@ -633,6 +639,8 @@ class FilePondField extends AbstractUploadField
         // expecting to receive a unique transfer id in the response body, it'll add the Upload-Length header to this request.
         if ($method == "POST") {
             // Initial post payload doesn't contain name
+            // It would be better to return some kind of random token instead
+            // But FilePond stores the id upon the first request :-(
             $file = new File();
             $this->setFileDetails($file, $request);
             $fileId = $file->ID;
@@ -730,6 +738,12 @@ class FilePondField extends AbstractUploadField
                 $file->setClassName(Image::class);
             }
             $file->write();
+            if (in_array(pathinfo($realFilename, PATHINFO_EXTENSION), $imageExtensions)) {
+                // Reload file instance
+                $file = Image::get()->byID($id);
+            }
+            // since we don't go through our upload object, call extension manually
+            $file->extend('onAfterUpload');
         }
         $response = new HTTPResponse('', 204);
         return $response;
