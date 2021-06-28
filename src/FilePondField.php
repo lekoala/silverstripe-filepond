@@ -409,7 +409,7 @@ class FilePondField extends AbstractUploadField
         // Image plugins
         if (self::config()->enable_image) {
             Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.js");
-            Requirements::css("https://cdn.jsdelivr.net/gh/pqina/unpkg.com/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css");
+            Requirements::css("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css");
             Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js");
         }
 
