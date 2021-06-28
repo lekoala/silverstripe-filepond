@@ -120,11 +120,6 @@ class FilePondField extends AbstractUploadField
     protected $filePondConfig = [];
 
     /**
-     * @var bool
-     */
-    protected $chunkUploads = false;
-
-    /**
      * Create a new file field.
      *
      * @param string $name The internal field name, passed to forms.
@@ -169,7 +164,7 @@ class FilePondField extends AbstractUploadField
      */
     public function getChunkUploads()
     {
-        return $this->chunkUploads;
+        return $this->getFilePondConfig('chunkUploads');
     }
 
     /**
@@ -180,7 +175,8 @@ class FilePondField extends AbstractUploadField
      */
     public function setChunkUploads($chunkUploads)
     {
-        $this->chunkUploads = $chunkUploads;
+        $this->addFilePondConfig('chunkUploads', true);
+        $this->addFilePondConfig('chunkForce', true);
         return $this;
     }
 
@@ -219,10 +215,6 @@ class FilePondField extends AbstractUploadField
             'server' => $this->getServerOptions(),
             'files' => $this->getExistingUploadsData(),
         ];
-        if ($this->chunkUploads) {
-            $config['chunkUploads'] = true;
-            $config['chunkForce'] = true;
-        }
 
         $acceptedFileTypes = $this->getAcceptedFileTypes();
         if (!empty($acceptedFileTypes)) {
@@ -298,13 +290,13 @@ class FilePondField extends AbstractUploadField
                 'Field must be associated with a form to call getServerOptions(). Please use $field->setForm($form);'
             );
         }
-        $endpoint = $this->chunkUploads ? 'chunk' : 'upload';
+        $endpoint = $this->getChunkUploads() ? 'chunk' : 'upload';
         $server = [
             'process' => $this->getUploadEnabled() ? $this->getLinkParameters($endpoint) : null,
             'fetch' => null,
             'revert' => null,
         ];
-        if ($this->chunkUploads) {
+        if ($this->getChunkUploads()) {
             $server['fetch'] =  $this->getLinkParameters($endpoint . "?fetch=");
             $server['patch'] =  $this->getLinkParameters($endpoint . "?patch=");
         }
