@@ -173,10 +173,11 @@ LeKoala\FilePond\FilePondField:
   enable_default_description: true
   enable_requirements: true
   enable_validation: true
-  enable_poster: true
-  enable_image: true
+  enable_poster: false
+  enable_image: false
   enable_polyfill: true
   enable_ajax_init: true
+  chunk_by_default: false
 ```
 
 ## Todo

@@ -6,17 +6,18 @@ use Exception;
 use LogicException;
 use RuntimeException;
 use SilverStripe\Assets\File;
+use SilverStripe\ORM\SS_List;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use SilverStripe\Control\Director;
+use SilverStripe\Security\Security;
 use SilverStripe\View\Requirements;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\ORM\ValidationException;
-use SilverStripe\Security\Security;
 
 /**
  * A FilePond field
@@ -73,6 +74,12 @@ class FilePondField extends AbstractUploadField
      * @config
      * @var boolean
      */
+    private static $chunk_by_default = false;
+
+    /**
+     * @config
+     * @var boolean
+     */
     private static $enable_default_description = true;
 
     /**
@@ -96,6 +103,22 @@ class FilePondField extends AbstractUploadField
      * @var bool
      */
     protected $chunkUploads = false;
+
+    /**
+     * Create a new file field.
+     *
+     * @param string $name The internal field name, passed to forms.
+     * @param string $title The field label.
+     * @param SS_List $items Items assigned to this field
+     */
+    public function __construct($name, $title = null, SS_List $items = null)
+    {
+        parent::__construct($name, $title, $items);
+
+        if (self::config()->chunk_by_default) {
+            $this->setChunkUploads(true);
+        }
+    }
 
     /**
      * Set a custom config value for this field
