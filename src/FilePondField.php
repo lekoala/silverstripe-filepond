@@ -7,6 +7,7 @@ use LogicException;
 use RuntimeException;
 use SilverStripe\Assets\File;
 use SilverStripe\ORM\SS_List;
+use SilverStripe\Assets\Image;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
@@ -16,9 +17,9 @@ use SilverStripe\View\Requirements;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Control\HTTPResponse;
-use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\ORM\ValidationException;
+use SilverStripe\Core\Manifest\ModuleResourceLoader;
 
 /**
  * A FilePond field
@@ -100,6 +101,18 @@ class FilePondField extends AbstractUploadField
      * @var boolean
      */
     private static $use_cdn = true;
+
+    /**
+     * @config
+     * @var int
+     */
+    private static $poster_width = 352;
+
+    /**
+     * @config
+     * @var int
+     */
+    private static $poster_height = 264;
 
     /**
      * @var array
@@ -232,6 +245,12 @@ class FilePondField extends AbstractUploadField
             }
         }
 
+        // image poster
+        // @link https://pqina.nl/filepond/docs/api/plugins/file-poster/#usage
+        if (self::config()->enable_poster) {
+            $config['filePosterHeight'] = self::config()->poster_height ?? 264;
+        }
+
         $config = array_merge($config, $i18nConfig, $this->filePondConfig);
 
         return $config;
@@ -358,13 +377,7 @@ class FilePondField extends AbstractUploadField
             if (!$file) {
                 continue;
             }
-            // $poster = null;
-            // if ($file instanceof Image) {
-            //     $w = self::config()->get('thumbnail_width');
-            //     $h = self::config()->get('thumbnail_height');
-            //     $poster = $file->Fill($w, $h)->getAbsoluteURL();
-            // }
-            $existingUploads[] = [
+            $existingUpload = [
                 // the server file reference
                 'source' => (int) $fileID,
                 // set type to local to indicate an already uploaded file
@@ -376,13 +389,20 @@ class FilePondField extends AbstractUploadField
                         'size' => (int) $file->getAbsoluteSize(),
                         'type' => $file->getMimeType(),
                     ],
-                    // poster
-                    // 'metadata' => [
-                    //     'poster' => $poster
-                    // ]
                 ],
-
+                'metadata' => []
             ];
+
+            // Show poster
+            // @link https://pqina.nl/filepond/docs/api/plugins/file-poster/#usage
+            if (self::config()->enable_poster && $file instanceof Image) {
+                // Size matches the one from asset admin
+                $w = self::config()->poster_width ?? 352;
+                $h = self::config()->poster_height ?? 264;
+                $poster = $file->Fill($w, $h)->getAbsoluteURL();
+                $existingUpload['options']['metadata']['poster'] = $poster;
+            }
+            $existingUploads[] = $existingUpload;
         }
         return $existingUploads;
     }
