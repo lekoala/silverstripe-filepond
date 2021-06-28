@@ -685,14 +685,20 @@ class FilePondField extends AbstractUploadField
             return $response;
         }
 
+        // location of patch files
+        $filePath = TEMP_PATH . "/filepond-" . $id;
+
         // FilePond will send a HEAD request to determine which chunks have already been uploaded,
         // expecting the file offset of the next expected chunk in the Upload-Offset response header.
         if ($method == "HEAD") {
             $nextOffset = 0;
+            while (is_file($filePath . '.patch.' . $nextOffset)) {
+                $nextOffset++;
+            }
 
-            //TODO: iterate over temp files and check next offset
             $response = new HTTPResponse($nextOffset, 200);
             $response->addHeader('Content-Type', 'text/plain');
+            $response->addHeader('Upload-Offset', $nextOffset);
             return $response;
         }
 
@@ -704,13 +710,10 @@ class FilePondField extends AbstractUploadField
 
         // The name of the file being transferred
         $uploadName = $request->getHeader('Upload-Name');
-        // The total size of the file being transferred
+        // The offset of the chunk being transferred (starts with 0)
         $offset = $request->getHeader('Upload-Offset');
-        // The offset of the chunk being transferred
+        // The total size of the file being transferred (in bytes)
         $length = $request->getHeader('Upload-Length');
-
-        // location of patch files
-        $filePath = TEMP_PATH . "/filepond-" . $id;
 
         // should be numeric values, else exit
         if (!is_numeric($offset) || !is_numeric($length)) {
