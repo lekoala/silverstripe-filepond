@@ -47,6 +47,10 @@ function attachFilePond() {
         var el = anchors[i];
         var pond = FilePond.create(el);
         var config = JSON.parse(el.dataset.config);
+        // Allow setting a custom global handler
+        if (typeof config["server"] === "string") {
+            config["server"] = window[config["server"]];
+        }
         for (var key in config) {
             // We can set the properties directly in the instance
             // @link https://pqina.nl/filepond/docs/patterns/api/filepond-instance/#properties

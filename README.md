@@ -180,6 +180,11 @@ However, if you happen to include FilePond on your own, you can disable this beh
 There is an additionnal little javascript file to help with dealing with init after an ajax like (like in the Admin).
 It is enabled by default and controlled by the `enable_ajax_init` flag.
 
+## Custom server config
+
+If for some reason you use a custom endpoint for your FilePond, you can use the `setCustomServerConfig`. You can pass
+an array of options (for simple configs) or a string that should be the name of a global js handler.
+
 ## Config flags
 
 FilePondField has the following configurable options

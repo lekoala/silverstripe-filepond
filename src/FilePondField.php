@@ -128,6 +128,11 @@ class FilePondField extends AbstractUploadField
     protected $filePondConfig = [];
 
     /**
+     * @var array
+     */
+    protected $customServerConfig = [];
+
+    /**
      * Create a new file field.
      *
      * @param string $name The internal field name, passed to forms.
@@ -166,6 +171,7 @@ class FilePondField extends AbstractUploadField
     {
         return $this->filePondConfig;
     }
+
     /**
      * Get the value of chunkUploads
      * @return bool
@@ -176,6 +182,27 @@ class FilePondField extends AbstractUploadField
             return false;
         }
         return $this->filePondConfig['chunkUploads'];
+    }
+
+    /**
+     * Get the value of customServerConfig
+     * @return array
+     */
+    public function getCustomServerConfig()
+    {
+        return $this->customServerConfig;
+    }
+
+    /**
+     * Set the value of customServerConfig
+     *
+     * @param array $customServerConfig
+     * @return $this
+     */
+    public function setCustomServerConfig(array $customServerConfig)
+    {
+        $this->customServerConfig = $customServerConfig;
+        return $this;
     }
 
     /**
@@ -308,7 +335,6 @@ class FilePondField extends AbstractUploadField
         return parent::setValue($value, $record);
     }
 
-
     /**
      * Configure our endpoint
      *
@@ -317,6 +343,9 @@ class FilePondField extends AbstractUploadField
      */
     public function getServerOptions()
     {
+        if ($this->customServerConfig) {
+            return $this->customServerConfig;
+        }
         if (!$this->getForm()) {
             throw new LogicException(
                 'Field must be associated with a form to call getServerOptions(). Please use $field->setForm($form);'
