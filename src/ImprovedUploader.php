@@ -24,6 +24,11 @@ trait ImprovedUploader
     protected $renamePattern;
 
     /**
+     * @var boolean
+     */
+    protected $showDescriptionSize = true;
+
+    /**
      * Array of accepted file types.
      * Can be mime types or wild cards. For instance ['image/*']
      * will accept all images. ['image/png', 'image/jpeg']
@@ -58,15 +63,18 @@ trait ImprovedUploader
     protected function setDefaultDescription($relation, $record = null, $name = null)
     {
         $desc = '';
-        $size = File::format_size($this->getValidator()->getAllowedMaxFileSize());
-        $desc = _t('ImprovedUploader.MAXSIZE', 'Max file size: {size}', ['size' => $size]);
+        if ($this->showDescriptionSize) {
+            $size = File::format_size($this->getValidator()->getAllowedMaxFileSize());
+            $desc .= _t('ImprovedUploader.MAXSIZE', 'Max file size: {size}', ['size' => $size]);
+        }
         if ($relation == Image::class) {
-            $desc .= '; ';
-
             // do we have a preferred size set on the record?
             if ($record) {
                 $sizes = $record->config()->image_sizes;
                 if ($sizes && isset($sizes[$name])) {
+                    if ($desc) {
+                        $desc .= '; ';
+                    }
                     // It is an array with two keys
                     $size = $sizes[$name][0] . 'x' . $sizes[$name][1];
                     if (isset($sizes[$name][2]) && $sizes[$name][2] == 'max') {
@@ -81,13 +89,18 @@ trait ImprovedUploader
         // Only show meaningful list of extensions
         $extensions = $this->getAllowedExtensions();
         if (count($extensions) < 7) {
-            $desc .= '; ';
+            if ($desc) {
+                $desc .= '; ';
+            }
             $desc .= _t('ImprovedUploader.ALLOWEXTENSION', 'Allowed extensions: {ext}', array('ext' => implode(',', $extensions)));
         }
 
         $this->description = $desc;
     }
 
+    /**
+     * @return string
+     */
     protected function getDefaultFolderName()
     {
         // There is no record, use default upload folder

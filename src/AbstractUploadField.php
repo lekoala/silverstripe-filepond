@@ -5,6 +5,7 @@ namespace LeKoala\FilePond;
 use LogicException;
 use SilverStripe\ORM\SS_List;
 use SilverStripe\Assets\Image;
+use SilverStripe\Core\Convert;
 use SilverStripe\Assets\Folder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\FormField;
@@ -201,6 +202,16 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
     public function getAllowedMaxFileSize()
     {
         return $this->getValidator()->getLargestAllowedMaxFileSize();
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isDefaultMaxFileSize()
+    {
+        // This returns null until getAllowedMaxFileSize is called
+        $current = $this->getValidator()->getLargestAllowedMaxFileSize();
+        return $current ? false : true;
     }
 
     /**

@@ -181,6 +181,9 @@ class FilePondField extends AbstractUploadField
     /**
      * Set the value of chunkUploads
      *
+     * Note: please set max file upload first if you want
+     * to see the size limit in the description
+     *
      * @param bool $chunkUploads
      * @return $this
      */
@@ -189,6 +192,9 @@ class FilePondField extends AbstractUploadField
         $this->addFilePondConfig('chunkUploads', true);
         $this->addFilePondConfig('chunkForce', true);
         $this->addFilePondConfig('chunkSize', $this->computeMaxChunkSize());
+        if ($this->isDefaultMaxFileSize()) {
+            $this->showDescriptionSize = false;
+        }
         return $this;
     }
 
