@@ -10,11 +10,11 @@ SilverStripe\Assets\File:
   enable_auto_thumbnails: false
   extensions:
     - LeKoala\FilePond\FilePondFileExtension
----
-Name: filepond-simpler
-After: "#simpler_silverstripe"
-Only:
-  moduleexists: "restruct/silverstripe-simpler"
----
-LeKoala\FilePond\FilePondField:
-  enable_ajax_init: false
+# ---
+# Name: filepond-simpler
+# After: "#simpler_silverstripe"
+# Only:
+#   moduleexists: "restruct/silverstripe-simpler"
+# ---
+# LeKoala\FilePond\FilePondField:
+#   enable_ajax_init: false

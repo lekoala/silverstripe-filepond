@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
     initFilePond();
     attachFilePond();
 });
-document.addEventListener("DOMNodesInserted", function () {
-    initFilePond();
-    attachFilePond();
-});
+// document.addEventListener("DOMNodesInserted", function () {
+//     initFilePond();
+//     attachFilePond();
+// });

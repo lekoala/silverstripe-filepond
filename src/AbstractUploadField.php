@@ -359,6 +359,8 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
     /**
      * Gets the upload folder name
      *
+     * Replaces method from UploadReceiver to provide a more flexible default
+     *
      * @return string
      */
     public function getFolderName()

@@ -751,6 +751,9 @@ class FilePondField extends AbstractUploadField
             fclose($outputFile);
 
             // Finalize real filename
+
+            // We need to class this as it mutates the state and set the record if any
+            $relationClass = $this->getRelationAutosetClass(null);
             $realFilename = $this->getFolderName() . "/" . $uploadName;
             if ($this->renamePattern) {
                 $realFilename = $this->changeFilenameWithPattern(
