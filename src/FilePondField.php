@@ -16,6 +16,7 @@ use SilverStripe\View\Requirements;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Control\HTTPResponse;
+use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\ORM\ValidationException;
 
@@ -93,6 +94,12 @@ class FilePondField extends AbstractUploadField
      * @var int
      */
     private static $auto_clear_threshold = true;
+
+    /**
+     * @config
+     * @var boolean
+     */
+    private static $use_cdn = true;
 
     /**
      * @var array
@@ -387,35 +394,41 @@ class FilePondField extends AbstractUploadField
      */
     public static function Requirements()
     {
+        $baseDir = "https://cdn.jsdelivr.net/gh/pqina/";
+        if (!self::config()->use_cdn) {
+            $asset = ModuleResourceLoader::resourceURL('lekoala/silverstripe-filepond:javascript/FilePondField.js');
+            $baseDir = dirname($asset) . "/cdn";
+        }
+
         // Polyfill to ensure max compatibility
         if (self::config()->enable_polyfill) {
-            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-polyfill/dist/filepond-polyfill.min.js");
+            Requirements::javascript("$baseDir/filepond-polyfill/dist/filepond-polyfill.min.js");
         }
 
         // File/image validation plugins
         if (self::config()->enable_validation) {
-            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js");
-            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js");
-            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-validate-size/dist/filepond-plugin-image-validate-size.js");
+            Requirements::javascript("$baseDir/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js");
+            Requirements::javascript("$baseDir/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js");
+            Requirements::javascript("$baseDir/filepond-plugin-image-validate-size/dist/filepond-plugin-image-validate-size.js");
         }
 
         // Poster plugins
         if (self::config()->enable_poster) {
-            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-file-metadata/dist/filepond-plugin-file-metadata.min.js");
-            Requirements::css("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.css");
-            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.js");
+            Requirements::javascript("$baseDir/filepond-plugin-file-metadata/dist/filepond-plugin-file-metadata.min.js");
+            Requirements::css("$baseDir/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.css");
+            Requirements::javascript("$baseDir/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.js");
         }
 
         // Image plugins
         if (self::config()->enable_image) {
-            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.js");
-            Requirements::css("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css");
-            Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js");
+            Requirements::javascript("$baseDir/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.js");
+            Requirements::css("$baseDir/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css");
+            Requirements::javascript("$baseDir/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js");
         }
 
         // Base elements
-        Requirements::css("https://cdn.jsdelivr.net/gh/pqina/filepond/dist/filepond.css");
-        Requirements::javascript("https://cdn.jsdelivr.net/gh/pqina/filepond/dist/filepond.js");
+        Requirements::css("$baseDir/filepond/dist/filepond.css");
+        Requirements::javascript("$baseDir/filepond/dist/filepond.js");
 
         // Our custom init
         Requirements::javascript('lekoala/silverstripe-filepond:javascript/FilePondField.js');

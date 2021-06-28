@@ -178,6 +178,7 @@ LeKoala\FilePond\FilePondField:
   enable_polyfill: true
   enable_ajax_init: true
   chunk_by_default: false
+  use_cdn: true
 ```
 
 ## Todo
