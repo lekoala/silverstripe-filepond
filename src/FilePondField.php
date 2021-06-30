@@ -144,6 +144,16 @@ class FilePondField extends AbstractUploadField
     protected $customServerConfig = null;
 
     /**
+     * @var int
+     */
+    protected $posterHeight = null;
+
+    /**
+     * @var int
+     */
+    protected $posterWidth = null;
+
+    /**
      * Create a new file field.
      *
      * @param string $name The internal field name, passed to forms.
@@ -171,6 +181,19 @@ class FilePondField extends AbstractUploadField
     {
         $this->filePondConfig[$k] = $v;
         return $this;
+    }
+
+    /**
+     * @param string $k
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getCustomConfigValue($k, $default = null)
+    {
+        if (isset($this->filePondConfig[$k])) {
+            return $this->filePondConfig[$k];
+        }
+        return $default;
     }
 
     /**
@@ -310,6 +333,17 @@ class FilePondField extends AbstractUploadField
         foreach ($config as $k => $v) {
             $this->addFilePondConfig($k, $v);
         }
+
+        // We need a custom poster size
+
+        // If the height is smaller than our default, make smaller
+        if ($height < self::getDefaultPosterHeight()) {
+            $this->posterHeight = $height;
+        }
+        // Adjust width accordingly
+        $ratio = $height / self::getDefaultPosterHeight();
+        $this->posterWidth = $width / $ratio;
+
         return $config;
     }
 
@@ -356,6 +390,12 @@ class FilePondField extends AbstractUploadField
             $config['acceptedFileTypes'] = array_values($acceptedFileTypes);
         }
 
+        // image poster
+        // @link https://pqina.nl/filepond/docs/api/plugins/file-poster/#usage
+        if (self::config()->enable_poster) {
+            $config['filePosterHeight'] = self::config()->poster_height ?? 264;
+        }
+
         // image validation/crop based on record
         $record = $this->getForm()->getRecord();
         if ($record) {
@@ -367,11 +407,6 @@ class FilePondField extends AbstractUploadField
             }
         }
 
-        // image poster
-        // @link https://pqina.nl/filepond/docs/api/plugins/file-poster/#usage
-        if (self::config()->enable_poster) {
-            $config['filePosterHeight'] = self::config()->poster_height ?? 264;
-        }
 
         // Any custom setting will override the base ones
         $config = array_merge($config, $i18nConfig, $this->filePondConfig);
@@ -535,9 +570,12 @@ class FilePondField extends AbstractUploadField
             // Show poster
             // @link https://pqina.nl/filepond/docs/api/plugins/file-poster/#usage
             if (self::config()->enable_poster && $file instanceof Image && $file->ID) {
-                // Size matches the one from asset admin
-                $w = self::config()->poster_width ?? 352;
-                $h = self::config()->poster_height ?? 264;
+                // Size matches the one from asset admin or from or set size
+                $w = self::getDefaultPosterWidth();
+                if ($this->posterWidth) {
+                    $w = $this->posterWidth;
+                }
+                $h = self::getDefaultPosterHeight();
                 $resizedImage = $file->Fill($w, $h);
                 if ($resizedImage) {
                     $poster = $resizedImage->getAbsoluteURL();
@@ -547,6 +585,22 @@ class FilePondField extends AbstractUploadField
             $existingUploads[] = $existingUpload;
         }
         return $existingUploads;
+    }
+
+    /**
+     * @return int
+     */
+    public static function getDefaultPosterWidth()
+    {
+        return self::config()->poster_width ?? 352;
+    }
+
+    /**
+     * @return int
+     */
+    public static function getDefaultPosterHeight()
+    {
+        return self::config()->poster_height ?? 264;
     }
 
     /**
