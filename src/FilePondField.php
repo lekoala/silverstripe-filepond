@@ -11,7 +11,6 @@ use SilverStripe\Assets\Image;
 use SilverStripe\Core\Convert;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Security\Member;
 use SilverStripe\Control\Director;
 use SilverStripe\Security\Security;
 use SilverStripe\View\Requirements;
@@ -160,7 +159,7 @@ class FilePondField extends AbstractUploadField
      *
      * @link https://pqina.nl/filepond/docs/patterns/api/filepond-instance/#properties
      * @param string $k
-     * @param string $v
+     * @param string|bool|array $v
      * @return $this
      */
     public function addFilePondConfig($k, $v)
@@ -629,7 +628,7 @@ class FilePondField extends AbstractUploadField
      * Along with the file object, FilePond also sends the file metadata to the server, both these objects are given the same name.
      *
      * @param HTTPRequest $request
-     * @return HTTPResponse
+     * @return SilverStripe\Control\HTTPResponse
      */
     public function upload(HTTPRequest $request)
     {
@@ -671,7 +670,7 @@ class FilePondField extends AbstractUploadField
     /**
      * @link https://pqina.nl/filepond/docs/api/server/#process-chunks
      * @param HTTPRequest $request
-     * @return void
+     * @return SilverStripe\Control\HTTPResponse
      */
     public function chunk(HTTPRequest $request)
     {
@@ -727,9 +726,9 @@ class FilePondField extends AbstractUploadField
         // The name of the file being transferred
         $uploadName = $request->getHeader('Upload-Name');
         // The offset of the chunk being transferred (starts with 0)
-        $offset = $request->getHeader('Upload-Offset');
+        $offset = (int) $request->getHeader('Upload-Offset');
         // The total size of the file being transferred (in bytes)
-        $length = $request->getHeader('Upload-Length');
+        $length = (int) $request->getHeader('Upload-Length');
 
         // should be numeric values, else exit
         if (!is_numeric($offset) || !is_numeric($length)) {
@@ -784,7 +783,7 @@ class FilePondField extends AbstractUploadField
             // write output file to asset store
             $file = $this->getFileByID($id);
             if (!$file) {
-                return $this->httpError("File $id not found");
+                return $this->httpError(400, "File $id not found");
             }
             $file->setFromLocalFile($filePath);
             $file->setFilename($realFilename);
@@ -808,7 +807,7 @@ class FilePondField extends AbstractUploadField
     /**
      * @link https://pqina.nl/filepond/docs/api/server/#revert
      * @param HTTPRequest $request
-     * @return void
+     * @return SilverStripe\Control\HTTPResponse
      */
     public function revert(HTTPRequest $request)
     {
