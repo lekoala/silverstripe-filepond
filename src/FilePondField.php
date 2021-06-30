@@ -275,7 +275,7 @@ class FilePondField extends AbstractUploadField
     /**
      * @param int $width
      * @param int $height
-     * @param string $mode min|max|crop
+     * @param string $mode min|max|crop|resize|crop_resize
      * @return array
      */
     public function getImageSizeConfig($width, $height, $mode = null)
@@ -335,7 +335,18 @@ class FilePondField extends AbstractUploadField
         }
 
         // We need a custom poster size
+        $this->adjustPosterSize($width, $height);
 
+        return $config;
+    }
+
+    /**
+     * @param int $width
+     * @param int $height
+     * @return void
+     */
+    protected function adjustPosterSize($width, $height)
+    {
         // If the height is smaller than our default, make smaller
         if ($height < self::getDefaultPosterHeight()) {
             $this->posterHeight = $height;
@@ -345,8 +356,6 @@ class FilePondField extends AbstractUploadField
             $ratio = $height / self::getDefaultPosterHeight();
             $this->posterWidth = $width / $ratio;
         }
-
-        return $config;
     }
 
     /**
@@ -406,6 +415,7 @@ class FilePondField extends AbstractUploadField
             if ($sizes && isset($sizes[$name])) {
                 $newConfig = $this->getImageSizeConfigFromArray($sizes[$name]);
                 $config = array_merge($config, $newConfig);
+                $this->adjustPosterSize($sizes[$name][0], $sizes[$name][1]);
             }
         }
 
