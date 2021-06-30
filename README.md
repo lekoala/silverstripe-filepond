@@ -135,6 +135,8 @@ $Photo->setImageSize(300, 200, 'crop');
 You can read more here:
 
 https://pqina.nl/filepond/docs/patterns/plugins/image-validate-size/
+https://pqina.nl/filepond/docs/api/plugins/image-resize/
+https://pqina.nl/filepond/docs/api/plugins/image-crop/
 
 ## Renaming and organizing files
 
