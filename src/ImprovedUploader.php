@@ -8,6 +8,7 @@ use SilverStripe\Assets\File;
 use SilverStripe\Assets\Image;
 use SilverStripe\Control\HTTP;
 use SilverStripe\Assets\Upload;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\Assets\FileNameFilter;
 
 /**

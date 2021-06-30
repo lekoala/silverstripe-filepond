@@ -136,7 +136,7 @@ class FilePondField extends AbstractUploadField
     /**
      * @var array
      */
-    protected $customServerConfig = [];
+    protected $customServerConfig = null;
 
     /**
      * Create a new file field.
@@ -349,7 +349,7 @@ class FilePondField extends AbstractUploadField
      */
     public function getServerOptions()
     {
-        if ($this->customServerConfig) {
+        if (!empty($this->customServerConfig)) {
             return $this->customServerConfig;
         }
         if (!$this->getForm()) {
