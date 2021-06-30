@@ -339,10 +339,12 @@ class FilePondField extends AbstractUploadField
         // If the height is smaller than our default, make smaller
         if ($height < self::getDefaultPosterHeight()) {
             $this->posterHeight = $height;
+            $this->posterWidth = $width;
+        } else {
+            // Adjust width to keep aspect ratio with our default height
+            $ratio = $height / self::getDefaultPosterHeight();
+            $this->posterWidth = $width / $ratio;
         }
-        // Adjust width accordingly
-        $ratio = $height / self::getDefaultPosterHeight();
-        $this->posterWidth = $width / $ratio;
 
         return $config;
     }
@@ -576,6 +578,9 @@ class FilePondField extends AbstractUploadField
                     $w = $this->posterWidth;
                 }
                 $h = self::getDefaultPosterHeight();
+                if ($this->posterHeight) {
+                    $h = $this->posterHeight;
+                }
                 $resizedImage = $file->Fill($w, $h);
                 if ($resizedImage) {
                     $poster = $resizedImage->getAbsoluteURL();
