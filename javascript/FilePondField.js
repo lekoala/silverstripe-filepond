@@ -27,6 +27,15 @@ function initFilePond() {
     if (typeof FilePondPluginImagePreview !== "undefined") {
         FilePond.registerPlugin(FilePondPluginImagePreview);
     }
+    if (typeof FilePondPluginImageTransform  !== "undefined") {
+        FilePond.registerPlugin(FilePondPluginImageTransform );
+    }
+    if (typeof FilePondPluginImageCrop !== "undefined") {
+        FilePond.registerPlugin(FilePondPluginImageCrop);
+    }
+    if (typeof FilePondPluginImageResize  !== "undefined") {
+        FilePond.registerPlugin(FilePondPluginImageResize );
+    }
 
     FilePond.setOptions({
         credits: false,

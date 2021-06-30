@@ -106,15 +106,31 @@ You can define custom image sizes on your records based on convention. For examp
 
 ```yml
 MyRecord:
-  images_sizes:
+  image_sizes:
     Avatar: [512,512,'max']
+    SquareImage: [512,512,'crop']
     LargeImage: [1080,1080]
 ```
 
-Parameters are width, height. You can set a 3rd parameter to 'max' to ensure the file is below this size.
-By default, the size should be minimum the configured size.
+Parameters are width, height. You can set a 3rd parameter to:
+- 'min' to ensure the file is above this size (default if no value is specified).
+- 'max' to ensure the file is below this size.
+- 'crop' to crop the file to this ratio (keep the largest image possible matching this ratio).
+  - Example : Setting 512,512 means a squared ratio (effectively, this is 1:1)
+- 'resize' resize the file to this size (keeps aspect ratio of the file).
+- 'crop_resize' crop and resize the file to this size (use our set aspect ratio).
+
+Image manipulations happen on the client side, the file that gets sent to the server will have the configured
+size. Very useful to deal with large avoid or avoiding scaling files after upload.
 
 If defined, the field description and the validation will be automatically applied.
+
+You can also use the `setImageSize` method directly on the uploader instance with similar parameters.
+
+```php
+$fields->replaceField("Photo", $Photo = new FilePondField("Photo"));
+$Photo->setImageSize(300, 200, 'crop');
+```
 
 You can read more here:
 
@@ -179,6 +195,9 @@ However, if you happen to include FilePond on your own (because you use webpack 
 
 There is an additionnal little javascript file to help with dealing with init after an ajax like (like in the Admin).
 It is enabled by default and controlled by the `enable_ajax_init` flag.
+
+You can also use bundled files instead of separate files with `use_bundle`. This will locally bundled files (not the cdn).
+Warning: all plugins are included, regardless of those that are activated in the config.
 
 ## Custom server config
 

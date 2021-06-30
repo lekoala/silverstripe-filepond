@@ -27,6 +27,11 @@ use SilverStripe\Core\Manifest\ModuleResourceLoader;
 class FilePondField extends AbstractUploadField
 {
     const BASE_CDN = "https://cdn.jsdelivr.net/gh/pqina";
+    const IMAGE_MODE_MIN = "min";
+    const IMAGE_MODE_MAX = "max";
+    const IMAGE_MODE_CROP = "crop";
+    const IMAGE_MODE_RESIZE = "resize";
+    const IMAGE_MODE_CROP_RESIZE = "crop_resize";
 
     /**
      * @config
@@ -232,6 +237,83 @@ class FilePondField extends AbstractUploadField
     }
 
     /**
+     * @param array $sizes
+     * @return array
+     */
+    public function getImageSizeConfigFromArray($sizes)
+    {
+        $mode = null;
+        if (isset($sizes[2])) {
+            $mode = $sizes[2];
+        }
+        return $this->getImageSizeConfig($sizes[0], $sizes[1], $mode);
+    }
+
+    /**
+     * @param int $width
+     * @param int $height
+     * @param string $mode min|max|crop
+     * @return array
+     */
+    public function getImageSizeConfig($width, $height, $mode = null)
+    {
+        if ($mode === null) {
+            $mode = self::IMAGE_MODE_MIN;
+        }
+        $config = [];
+        switch ($mode) {
+            case self::IMAGE_MODE_MIN:
+                $config['imageValidateSizeMinWidth'] = $width;
+                $config['imageValidateSizeMinHeight'] = $height;
+                break;
+            case self::IMAGE_MODE_MAX:
+                $config['imageValidateSizeMaxWidth'] = $width;
+                $config['imageValidateSizeMaxHeight'] = $height;
+                break;
+            case self::IMAGE_MODE_CROP:
+                // It crops only to given ratio and tries to keep the largest image
+                $config['allowImageCrop'] = true;
+                $config['imageCropAspectRatio'] = "{$width}:{$height}";
+                break;
+            case self::IMAGE_MODE_RESIZE:
+                //  Cover will respect the aspect ratio and will scale to fill the target dimensions
+                $config['allowImageResize'] = true;
+                $config['imageResizeTargetWidth'] = $width;
+                $config['imageResizeTargetHeight'] = $height;
+
+                // Don't use these settings and keep api simple
+                // $config['imageResizeMode'] = 'cover';
+                // $config['imageResizeUpscale'] = true;
+                break;
+            case self::IMAGE_MODE_CROP_RESIZE:
+                $config['allowImageResize'] = true;
+                $config['imageResizeTargetWidth'] = $width;
+                $config['imageResizeTargetHeight'] = $height;
+                $config['allowImageCrop'] = true;
+                $config['imageCropAspectRatio'] = "{$width}:{$height}";
+                break;
+            default:
+                throw new Exception("Unsupported '$mode' mode");
+        }
+        return $config;
+    }
+
+    /**
+     * @param int $width
+     * @param int $height
+     * @param string $mode min|max|crop|resize|crop_resize
+     * @return $this
+     */
+    public function setImageSize($width, $height, $mode = null)
+    {
+        $config = $this->getImageSizeConfig($width, $height, $mode);
+        foreach ($config as $k => $v) {
+            $this->addFilePondConfig($k, $v);
+        }
+        return $config;
+    }
+
+    /**
      * Return the config applied for this field
      *
      * Typically converted to json and set in a data attribute
@@ -258,6 +340,8 @@ class FilePondField extends AbstractUploadField
             'labelTapToRetry' => _t('FilePondField.labelTapToCancel', 'tap to retry'),
             'labelTapToUndo' => _t('FilePondField.labelTapToCancel', 'tap to undo'),
         ];
+
+        // Base config
         $config = [
             'name' => $name, // This will also apply to the hidden fields
             'allowMultiple' => $multiple,
@@ -272,19 +356,14 @@ class FilePondField extends AbstractUploadField
             $config['acceptedFileTypes'] = array_values($acceptedFileTypes);
         }
 
-        // image validation
+        // image validation/crop based on record
         $record = $this->getForm()->getRecord();
         if ($record) {
             $sizes = $record->config()->image_sizes;
             $name = $this->getSafeName();
             if ($sizes && isset($sizes[$name])) {
-                if (isset($sizes[$name][2]) && $sizes[$name][2] == 'max') {
-                    $config['imageValidateSizeMaxWidth'] = $sizes[$name][0];
-                    $config['imageValidateSizeMaxHeight'] = $sizes[$name][1];
-                } else {
-                    $config['imageValidateSizeMinWidth'] = $sizes[$name][0];
-                    $config['imageValidateSizeMinHeight'] = $sizes[$name][1];
-                }
+                $newConfig = $this->getImageSizeConfigFromArray($sizes[$name]);
+                $config = array_merge($config, $newConfig);
             }
         }
 
@@ -294,6 +373,7 @@ class FilePondField extends AbstractUploadField
             $config['filePosterHeight'] = self::config()->poster_height ?? 264;
         }
 
+        // Any custom setting will override the base ones
         $config = array_merge($config, $i18nConfig, $this->filePondConfig);
 
         return $config;
@@ -454,12 +534,15 @@ class FilePondField extends AbstractUploadField
 
             // Show poster
             // @link https://pqina.nl/filepond/docs/api/plugins/file-poster/#usage
-            if (self::config()->enable_poster && $file instanceof Image) {
+            if (self::config()->enable_poster && $file instanceof Image && $file->ID) {
                 // Size matches the one from asset admin
                 $w = self::config()->poster_width ?? 352;
                 $h = self::config()->poster_height ?? 264;
-                $poster = $file->Fill($w, $h)->getAbsoluteURL();
-                $existingUpload['options']['metadata']['poster'] = $poster;
+                $resizedImage = $file->Fill($w, $h);
+                if ($resizedImage) {
+                    $poster = $resizedImage->getAbsoluteURL();
+                    $existingUpload['options']['metadata']['poster'] = $poster;
+                }
             }
             $existingUploads[] = $existingUpload;
         }
@@ -510,6 +593,9 @@ class FilePondField extends AbstractUploadField
                 Requirements::javascript("$baseDir/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.min.js");
                 Requirements::css("$baseDir/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css");
                 Requirements::javascript("$baseDir/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js");
+                Requirements::javascript("$baseDir/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.min.js");
+                Requirements::javascript("$baseDir/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.min.js");
+                Requirements::javascript("$baseDir/filepond-plugin-image-crop/dist/filepond-plugin-image-crop.min.js");
             }
 
             // Base elements
