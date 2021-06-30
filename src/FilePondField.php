@@ -349,7 +349,7 @@ class FilePondField extends AbstractUploadField
      * This is a frontend alternative to setRenamePattern
      *
      * @link https://pqina.nl/filepond/docs/api/plugins/file-rename/
-     * @param string $name
+     * @param string $name The name (extension is added automatically)
      * @return $this
      */
     public function setRenameFile($name)

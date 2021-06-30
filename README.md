@@ -176,6 +176,13 @@ $pond = new FilePondField('Avatar');
 $pond->setRenamePattern($member->Username . "_avatar.{extension}");
 ```
 
+You can also use the built-in Filepond renamer like this. Files will be renamed in the frontend before being upload to the server:
+
+```php
+$pond = new FilePondField('Avatar');
+$pond->setRenameFile('my_avatar_' . time());
+```
+
 ## Chunked uploads
 
 If you need to upload large videos, you can use `setChunkUploads`. File will be uploaded in chunks (size is computed automatically based on server settings) and then merged on the last upload.
