@@ -628,7 +628,7 @@ class FilePondField extends AbstractUploadField
      * Along with the file object, FilePond also sends the file metadata to the server, both these objects are given the same name.
      *
      * @param HTTPRequest $request
-     * @return \SilverStripe\Control\HTTPResponse
+     * @return HTTPResponse
      */
     public function upload(HTTPRequest $request)
     {
@@ -670,7 +670,7 @@ class FilePondField extends AbstractUploadField
     /**
      * @link https://pqina.nl/filepond/docs/api/server/#process-chunks
      * @param HTTPRequest $request
-     * @return \SilverStripe\Control\HTTPResponse
+     * @return HTTPResponse
      */
     public function chunk(HTTPRequest $request)
     {
@@ -807,7 +807,7 @@ class FilePondField extends AbstractUploadField
     /**
      * @link https://pqina.nl/filepond/docs/api/server/#revert
      * @param HTTPRequest $request
-     * @return \SilverStripe\Control\HTTPResponse
+     * @return HTTPResponse
      */
     public function revert(HTTPRequest $request)
     {

@@ -5,15 +5,17 @@ namespace LeKoala\FilePond;
 use LogicException;
 use SilverStripe\ORM\SS_List;
 use SilverStripe\Assets\Image;
-use SilverStripe\Core\Convert;
 use SilverStripe\Assets\Folder;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Forms\FormField;
+use SilverStripe\Forms\Validator;
 use SilverStripe\Control\Controller;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Forms\FileHandleField;
 use SilverStripe\Control\NullHTTPRequest;
 use SilverStripe\Forms\FileUploadReceiver;
+use SilverStripe\AssetAdmin\Forms\UploadField;
 
 /**
  * An abstract class that serve as a base to implement dedicated uploaders
