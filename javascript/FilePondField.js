@@ -18,6 +18,9 @@ function initFilePond() {
     if (typeof FilePondPluginFileMetadata !== "undefined") {
         FilePond.registerPlugin(FilePondPluginFileMetadata);
     }
+    if (typeof FilePondPluginFileRename !== "undefined") {
+        FilePond.registerPlugin(FilePondPluginFileRename);
+    }
     if (typeof FilePondPluginFilePoster !== "undefined") {
         FilePond.registerPlugin(FilePondPluginFilePoster);
     }
@@ -62,6 +65,12 @@ function attachFilePond(rootNode) {
         // Allow setting a custom global handler
         if (typeof config["server"] === "string") {
             config["server"] = window[config["server"]];
+        }
+        if (typeof config["fileRenameFunction"] === "string") {
+            var newName = config["fileRenameFunction"];
+            config["fileRenameFunction"] = function(file) {
+                return newName + file.extension;
+            }
         }
         for (var key in config) {
             // We can set the properties directly in the instance

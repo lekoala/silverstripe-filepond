@@ -324,6 +324,9 @@ class FilePondField extends AbstractUploadField
     }
 
     /**
+     * @link https://pqina.nl/filepond/docs/api/plugins/image-crop/
+     * @link https://pqina.nl/filepond/docs/api/plugins/image-resize/
+     * @link https://pqina.nl/filepond/docs/api/plugins/image-validate-size/
      * @param int $width
      * @param int $height
      * @param string $mode min|max|crop|resize|crop_resize
@@ -339,7 +342,20 @@ class FilePondField extends AbstractUploadField
         // We need a custom poster size
         $this->adjustPosterSize($width, $height);
 
-        return $config;
+        return $this;
+    }
+
+    /**
+     * This is a frontend alternative to setRenamePattern
+     *
+     * @link https://pqina.nl/filepond/docs/api/plugins/file-rename/
+     * @param string $name
+     * @return $this
+     */
+    public function setRenameFile($name)
+    {
+        $this->addFilePondConfig('fileRenameFunction', $name);
+        return $this;
     }
 
     /**
@@ -692,6 +708,7 @@ class FilePondField extends AbstractUploadField
             }
 
             // Base elements
+            Requirements::javascript("$baseDir/filepond-plugin-file-rename/dist/filepond-plugin-file-rename.min.js");
             Requirements::css("$baseDir/filepond/dist/filepond.min.css");
             Requirements::javascript("$baseDir/filepond/dist/filepond.min.js");
         }

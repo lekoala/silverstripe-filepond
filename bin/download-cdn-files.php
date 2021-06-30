@@ -18,6 +18,7 @@ $files[] = "https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-preview/dist
 $files[] = "https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.min.js";
 $files[] = "https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.min.js";
 $files[] = "https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-image-crop/dist/filepond-plugin-image-crop.min.js";
+$files[] = "https://cdn.jsdelivr.net/gh/pqina/filepond-plugin-file-rename/dist/filepond-plugin-file-rename.min.js";
 $files[] =  "https://cdn.jsdelivr.net/gh/pqina/filepond/dist/filepond.min.css";
 $files[] =  "https://cdn.jsdelivr.net/gh/pqina/filepond/dist/filepond.min.js";
 
