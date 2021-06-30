@@ -187,7 +187,7 @@ an array of options (for simple configs) or a string that should be the name of 
 
 ## Simpler SilverStripe support
 
-If you use Simpler SilverStripe, this module will use `DOMNodesInserted` and disable custom ajax support.
+If you use [Simpler SilverStripe](https://github.com/restruct/silverstripe-simpler), this module will use `DOMNodesInserted` and disable custom ajax support.
 
 ## Config flags
 

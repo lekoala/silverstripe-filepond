@@ -17,6 +17,9 @@ Only:
 ---
 SilverStripe\Admin\LeftAndMain:
   extra_requirements_javascript:
+    - 'lekoala/silverstripe-filepond:javascript/bundle.js'
     - 'lekoala/silverstripe-filepond:javascript/FilePondField.js'
+  extra_requirements_css:
+    - 'lekoala/silverstripe-filepond:javascript/bundle.css'
 LeKoala\FilePond\FilePondField:
   enable_ajax_init: false
