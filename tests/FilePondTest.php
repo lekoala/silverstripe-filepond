@@ -185,4 +185,12 @@ class FilePondTest extends SapphireTest
         $pond->addFilePondConfig('allowDrop', false);
         $this->assertArrayHasKey('allowDrop', $pond->getFilePondConfig());
     }
+
+    public function testRequirements()
+    {
+        FilePondField::config()->use_cdn = true;
+        FilePondField::Requirements();
+        FilePondField::config()->use_cdn = false;
+        FilePondField::Requirements();
+    }
 }

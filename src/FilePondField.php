@@ -27,6 +27,7 @@ use SilverStripe\Core\Manifest\ModuleResourceLoader;
  */
 class FilePondField extends AbstractUploadField
 {
+    const BASE_CDN = "https://cdn.jsdelivr.net/gh/pqina";
 
     /**
      * @config
@@ -467,11 +468,12 @@ class FilePondField extends AbstractUploadField
      */
     public static function Requirements()
     {
-        $baseDir = "https://cdn.jsdelivr.net/gh/pqina/";
+        $baseDir = self::BASE_CDN;
         if (!self::config()->use_cdn) {
             $asset = ModuleResourceLoader::resourceURL('lekoala/silverstripe-filepond:javascript/FilePondField.js');
             $baseDir = dirname($asset) . "/cdn";
         }
+        $baseDir = rtrim($baseDir, '/');
 
         // Polyfill to ensure max compatibility
         if (self::config()->enable_polyfill) {
