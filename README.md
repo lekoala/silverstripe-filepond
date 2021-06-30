@@ -171,10 +171,10 @@ You can also enable this globally with `chunk_by_default`.
 
 ## Requirements
 
-In order to provide a working out of the box experience, js requirements are loaded from cdn
+In order to provide a working out of the box experience, js requirements are loaded from cdn or the local javascript folder
 and the FilePondFields are initialized by the FilePondField.js script.
 
-However, if you happen to include FilePond on your own, you can disable this behaviour by setting
+However, if you happen to include FilePond on your own (because you use webpack or any kind of bundler), you can disable this behaviour by setting
 `enable_requirements` to `false`. You can have a look at FilePondField.js to see how to initialize the script properly.
 
 There is an additionnal little javascript file to help with dealing with init after an ajax like (like in the Admin).
@@ -206,9 +206,10 @@ LeKoala\FilePond\FilePondField:
   enable_ajax_init: true
   chunk_by_default: false
   use_cdn: true
+  use_bundle: false
   enable_auto_thumbnails: true
-  poster_width: true
-  poster_height: true
+  poster_width: 352
+  poster_height: 264
 ```
 
 ## Todo
