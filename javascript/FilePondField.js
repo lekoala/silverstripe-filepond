@@ -34,9 +34,12 @@ function initFilePond() {
 
     filepondIsInitialized = true;
 }
-function attachFilePond() {
+function attachFilePond(rootNode) {
+    if (!rootNode) {
+        rootNode = document;
+    }
     // Attach filepond to all related inputs
-    var anchors = document.querySelectorAll('input[type="file"].filepond');
+    var anchors = rootNode.querySelectorAll('input[type="file"].filepond');
     if (!anchors.length && filepondMaxTries > 0) {
         setTimeout(function () {
             filepondMaxTries--;
@@ -59,14 +62,20 @@ function attachFilePond() {
     }
 }
 document.addEventListener("DOMContentLoaded", function () {
+    if (typeof FilePond == "undefined") {
+        return;
+    }
     if (filepondIsInitialized) {
         return;
     }
     initFilePond();
-    attachFilePond();
+    attachFilePond(document);
 });
 // Alternative to FilePondField-init using simpler module
-document.addEventListener("DOMNodesInserted", function () {
+document.addEventListener("DOMNodesInserted", function (event) {
+    if (typeof FilePond == "undefined") {
+        return;
+    }
     initFilePond();
-    attachFilePond();
+    attachFilePond(event.target);
 });
