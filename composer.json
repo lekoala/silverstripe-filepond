@@ -20,7 +20,8 @@
     "require": {
         "silverstripe/framework": "^4",
         "silverstripe/assets": "^1.6",
-        "silverstripe/versioned": "^1.6"
+        "silverstripe/versioned": "^1.6",
+        "restruct/silverstripe-simpler": "^0.1"
     },
     "require-dev": {
         "sminnee/phpunit": "^5.7",
