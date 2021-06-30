@@ -86,7 +86,7 @@ These modules enable poster support to display nices images attached to the uplo
 
 ![poster](docs/poster-example.jpg "poster")
 
-## Validation
+## Validation, resizing and croping
 
 ### For files
 
@@ -99,7 +99,7 @@ https://pqina.nl/filepond/docs/patterns/plugins/file-validate-type/
 
 ### For images
 
-We also installed the image size validation plugin. This allows to avoid user uploading incorrect format that might be difficult
+We also installed the image size validation, resize and crop plugins. This allows to avoid user uploading incorrect format that might be difficult
 to crop or resize (GD crashing anyone?).
 
 You can define custom image sizes on your records based on convention. For example, for a squared avatar and a large image.
@@ -121,7 +121,7 @@ Parameters are width, height. You can set a 3rd parameter to:
 - 'crop_resize' crop and resize the file to this size (use our set aspect ratio).
 
 Image manipulations happen on the client side, the file that gets sent to the server will have the configured
-size. Very useful to deal with large avoid or avoiding scaling files after upload.
+size. Very useful to deal with large images or avoiding scaling files after upload.
 
 If defined, the field description and the validation will be automatically applied.
 
