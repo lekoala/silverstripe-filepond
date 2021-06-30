@@ -32,6 +32,8 @@ class FilePondField extends AbstractUploadField
     const IMAGE_MODE_CROP = "crop";
     const IMAGE_MODE_RESIZE = "resize";
     const IMAGE_MODE_CROP_RESIZE = "crop_resize";
+    const DEFAULT_POSTER_HEIGHT = 264;
+    const DEFAULT_POSTER_WIDTH = 352;
 
     /**
      * @config
@@ -359,6 +361,28 @@ class FilePondField extends AbstractUploadField
     }
 
     /**
+     * @return int
+     */
+    public function getPosterWidth()
+    {
+        if ($this->posterWidth) {
+            return $this->posterWidth;
+        }
+        return self::getDefaultPosterWidth();
+    }
+
+    /**
+     * @return int
+     */
+    public function getPosterHeight()
+    {
+        if ($this->posterHeight) {
+            return $this->posterHeight;
+        }
+        return self::getDefaultPosterHeight();
+    }
+
+    /**
      * Return the config applied for this field
      *
      * Typically converted to json and set in a data attribute
@@ -404,7 +428,7 @@ class FilePondField extends AbstractUploadField
         // image poster
         // @link https://pqina.nl/filepond/docs/api/plugins/file-poster/#usage
         if (self::config()->enable_poster) {
-            $config['filePosterHeight'] = self::config()->poster_height ?? 264;
+            $config['filePosterHeight'] = self::config()->poster_height ?? self::DEFAULT_POSTER_HEIGHT;
         }
 
         // image validation/crop based on record
@@ -607,7 +631,7 @@ class FilePondField extends AbstractUploadField
      */
     public static function getDefaultPosterWidth()
     {
-        return self::config()->poster_width ?? 352;
+        return self::config()->poster_width ?? self::DEFAULT_POSTER_WIDTH;
     }
 
     /**
@@ -615,7 +639,7 @@ class FilePondField extends AbstractUploadField
      */
     public static function getDefaultPosterHeight()
     {
-        return self::config()->poster_height ?? 264;
+        return self::config()->poster_height ?? self::DEFAULT_POSTER_HEIGHT;
     }
 
     /**

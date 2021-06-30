@@ -193,4 +193,20 @@ class FilePondTest extends SapphireTest
         FilePondField::config()->use_cdn = false;
         FilePondField::Requirements();
     }
+
+    public function testImageSizes()
+    {
+        $pond = $this->getPond();
+
+        $this->assertEquals(FilePondField::DEFAULT_POSTER_WIDTH, $pond->getPosterWidth());
+
+        $pond->setImageSize(10, 10);
+        $this->assertEquals(10, $pond->getPosterWidth());
+
+        $pond->setImageSize(100, 300);
+
+        $ratio = 300 / FilePondField::DEFAULT_POSTER_WIDTH; // 300/264 = 1,13
+        $targetWidth = 100 / $ratio; // 100/1,13 = 88
+        $this->assertEquals($targetWidth, $pond->getPosterWidth());
+    }
 }
