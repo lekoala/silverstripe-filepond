@@ -7,14 +7,18 @@ LeKoala\FilePond\FilePondField:
   enable_default_description: true
   enable_requirements: true
 SilverStripe\Assets\File:
-  enable_auto_thumbnails: false
   extensions:
     - LeKoala\FilePond\FilePondFileExtension
-# ---
-# Name: filepond-simpler
-# After: "#simpler_silverstripe"
-# Only:
-#   moduleexists: "restruct/silverstripe-simpler"
-# ---
-# LeKoala\FilePond\FilePondField:
-#   enable_ajax_init: false
+---
+Name: filepond-simpler
+After: "#simpler_silverstripe"
+Only:
+  moduleexists: "restruct/silverstripe-simpler"
+---
+SilverStripe\Admin\LeftAndMain:
+  extra_requirements_javascript:
+    - 'lekoala/silverstripe-filepond:client/dist/js/FilePondField.js'
+  extra_requirements_css:
+    - 'lekoala/silverstripe-filepond:client/dist/styles/FilePondField.css'
+LeKoala\FilePond\FilePondField:
+  enable_ajax_init: false

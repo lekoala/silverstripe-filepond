@@ -65,7 +65,8 @@ document.addEventListener("DOMContentLoaded", function () {
     initFilePond();
     attachFilePond();
 });
-// document.addEventListener("DOMNodesInserted", function () {
-//     initFilePond();
-//     attachFilePond();
-// });
+// Alternative to FilePondField-init using simpler module
+document.addEventListener("DOMNodesInserted", function () {
+    initFilePond();
+    attachFilePond();
+});
