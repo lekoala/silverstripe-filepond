@@ -1,0 +1,36 @@
+{
+  "name": "lekoala-silverstripe-filepond",
+  "description": "Silverstripe FilePond Field",
+  "scripts": {
+    "development": "mix",
+    "watch": "mix watch",
+    "watch-poll": "mix watch -- --watch-options-poll=1000",
+    "hot": "mix watch --hot",
+    "prod": "mix --production -- --watch",
+    "production": "mix --production"
+  },
+  "author": "LeKoala",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.0.0-0",
+    "@babel/preset-react": "^7.12.5",
+    "laravel-mix": "^6.0.11",
+    "postcss": "^8.1",
+    "resolve-url-loader": "^3.1.2",
+    "sass": "^1.32.13",
+    "sass-loader": "^11.0.1",
+    "webpack": "^5.0.0"
+  },
+  "dependencies": {
+    "filepond": "^4.28.0",
+    "filepond-plugin-file-metadata": "^1.0.8",
+    "filepond-plugin-file-poster": "^2.4.4",
+    "filepond-plugin-file-validate-size": "^2.2.4",
+    "filepond-plugin-file-validate-type": "^1.2.6",
+    "filepond-plugin-image-exif-orientation": "^1.0.11",
+    "filepond-plugin-image-preview": "^4.6.6",
+    "filepond-plugin-image-validate-size": "^1.2.6"
+  },
+  "main": "webpack.mix.js",
+  "keywords": []
+}

@@ -18,7 +18,6 @@
         }
     ],
     "require": {
-        "php": ">=7.2",
         "silverstripe/framework": "^4",
         "silverstripe/assets": "^1.6",
         "silverstripe/versioned": "^1.6"
@@ -30,7 +29,7 @@
     "extra": {
         "installer-name": "filepond",
         "expose": [
-            "javascript"
+            "client/dist"
         ]
     },
     "autoload": {
@@ -46,7 +45,5 @@
         "lint": "phpcs src/ tests/",
         "lint-clean": "phpcbf src/ tests/",
         "test": "phpunit -v"
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    }
 }
