@@ -109,6 +109,12 @@ class FilePondField extends AbstractUploadField
      * @config
      * @var boolean
      */
+    private static $use_bundle = false;
+
+    /**
+     * @config
+     * @var boolean
+     */
     private static $enable_auto_thumbnails = false;
 
     /**
@@ -469,46 +475,54 @@ class FilePondField extends AbstractUploadField
     public static function Requirements()
     {
         $baseDir = self::BASE_CDN;
-        if (!self::config()->use_cdn) {
+        if (!self::config()->use_cdn || self::config()->use_bundle) {
+            // We need some kind of base url to serve as a starting point
             $asset = ModuleResourceLoader::resourceURL('lekoala/silverstripe-filepond:javascript/FilePondField.js');
             $baseDir = dirname($asset) . "/cdn";
         }
         $baseDir = rtrim($baseDir, '/');
 
-        // Polyfill to ensure max compatibility
-        if (self::config()->enable_polyfill) {
-            Requirements::javascript("$baseDir/filepond-polyfill/dist/filepond-polyfill.min.js");
-        }
+        // It will load everything regardless of enabled plugins
+        if (self::config()->use_bundle) {
+            Requirements::css('lekoala/silverstripe-filepond:javascript/bundle.css');
+            Requirements::javascript('lekoala/silverstripe-filepond:javascript/bundle.js');
+        } else {
+            // Polyfill to ensure max compatibility
+            if (self::config()->enable_polyfill) {
+                Requirements::javascript("$baseDir/filepond-polyfill/dist/filepond-polyfill.min.js");
+            }
 
-        // File/image validation plugins
-        if (self::config()->enable_validation) {
-            Requirements::javascript("$baseDir/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js");
-            Requirements::javascript("$baseDir/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js");
-            Requirements::javascript("$baseDir/filepond-plugin-image-validate-size/dist/filepond-plugin-image-validate-size.js");
-        }
+            // File/image validation plugins
+            if (self::config()->enable_validation) {
+                Requirements::javascript("$baseDir/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js");
+                Requirements::javascript("$baseDir/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js");
+                Requirements::javascript("$baseDir/filepond-plugin-image-validate-size/dist/filepond-plugin-image-validate-size.min.js");
+            }
 
-        // Poster plugins
-        if (self::config()->enable_poster) {
-            Requirements::javascript("$baseDir/filepond-plugin-file-metadata/dist/filepond-plugin-file-metadata.min.js");
-            Requirements::css("$baseDir/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.css");
-            Requirements::javascript("$baseDir/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.js");
-        }
+            // Poster plugins
+            if (self::config()->enable_poster) {
+                Requirements::javascript("$baseDir/filepond-plugin-file-metadata/dist/filepond-plugin-file-metadata.min.js");
+                Requirements::css("$baseDir/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.css");
+                Requirements::javascript("$baseDir/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.js");
+            }
 
-        // Image plugins
-        if (self::config()->enable_image) {
-            Requirements::javascript("$baseDir/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.js");
-            Requirements::css("$baseDir/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css");
-            Requirements::javascript("$baseDir/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js");
-        }
+            // Image plugins
+            if (self::config()->enable_image) {
+                Requirements::javascript("$baseDir/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.min.js");
+                Requirements::css("$baseDir/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css");
+                Requirements::javascript("$baseDir/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js");
+            }
 
-        // Base elements
-        Requirements::css("$baseDir/filepond/dist/filepond.css");
-        Requirements::javascript("$baseDir/filepond/dist/filepond.js");
+            // Base elements
+            Requirements::css("$baseDir/filepond/dist/filepond.min.css");
+            Requirements::javascript("$baseDir/filepond/dist/filepond.min.js");
+        }
 
         // Our custom init
         Requirements::javascript('lekoala/silverstripe-filepond:javascript/FilePondField.js');
 
         // In the cms, init will not be triggered
+        // Or you could use simpler instead
         if (self::config()->enable_ajax_init && Director::is_ajax()) {
             Requirements::javascript('lekoala/silverstripe-filepond:javascript/FilePondField-init.js?t=' . time());
         }
