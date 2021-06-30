@@ -628,7 +628,7 @@ class FilePondField extends AbstractUploadField
      * Along with the file object, FilePond also sends the file metadata to the server, both these objects are given the same name.
      *
      * @param HTTPRequest $request
-     * @return SilverStripe\Control\HTTPResponse
+     * @return \SilverStripe\Control\HTTPResponse
      */
     public function upload(HTTPRequest $request)
     {
@@ -670,7 +670,7 @@ class FilePondField extends AbstractUploadField
     /**
      * @link https://pqina.nl/filepond/docs/api/server/#process-chunks
      * @param HTTPRequest $request
-     * @return SilverStripe\Control\HTTPResponse
+     * @return \SilverStripe\Control\HTTPResponse
      */
     public function chunk(HTTPRequest $request)
     {
@@ -726,7 +726,7 @@ class FilePondField extends AbstractUploadField
         // The name of the file being transferred
         $uploadName = $request->getHeader('Upload-Name');
         // The offset of the chunk being transferred (starts with 0)
-        $offset = (int) $request->getHeader('Upload-Offset');
+        $offset = $request->getHeader('Upload-Offset');
         // The total size of the file being transferred (in bytes)
         $length = (int) $request->getHeader('Upload-Length');
 
@@ -758,7 +758,7 @@ class FilePondField extends AbstractUploadField
                 fclose($patchFile);
 
                 // apply patch
-                fseek($outputFile, $offset);
+                fseek($outputFile, (int) $offset);
                 fwrite($outputFile, $patchContent);
             }
             // remove patches
@@ -807,7 +807,7 @@ class FilePondField extends AbstractUploadField
     /**
      * @link https://pqina.nl/filepond/docs/api/server/#revert
      * @param HTTPRequest $request
-     * @return SilverStripe\Control\HTTPResponse
+     * @return \SilverStripe\Control\HTTPResponse
      */
     public function revert(HTTPRequest $request)
     {
