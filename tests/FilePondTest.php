@@ -200,13 +200,14 @@ class FilePondTest extends SapphireTest
 
         $this->assertEquals(FilePondField::DEFAULT_POSTER_WIDTH, $pond->getPosterWidth());
 
+        // If the size is smaller that poster width, we use the size as is
         $pond->setImageSize(10, 10);
         $this->assertEquals(10, $pond->getPosterWidth());
 
+        // If it's larger, keep ratio
         $pond->setImageSize(100, 300);
-
-        $ratio = 300 / FilePondField::DEFAULT_POSTER_WIDTH; // 300/264 = 1,13
-        $targetWidth = 100 / $ratio; // 100/1,13 = 88
-        $this->assertEquals($targetWidth, $pond->getPosterWidth());
+        $ratio = 300 / FilePondField::DEFAULT_POSTER_HEIGHT;
+        $targetWidth = 100 / $ratio;
+        $this->assertEquals(round($targetWidth), round($pond->getPosterWidth()));
     }
 }
