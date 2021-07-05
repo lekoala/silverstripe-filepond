@@ -431,10 +431,13 @@ class FilePondField extends AbstractUploadField
             'name' => $name, // This will also apply to the hidden fields
             'allowMultiple' => $multiple,
             'maxFiles' => $this->getAllowedMaxFileNumber(),
-            'maxFileSize' => $this->getMaxFileSize(),
             'server' => $this->getServerOptions(),
             'files' => $this->getExistingUploadsData(),
         ];
+        $maxFileSize = $this->getMaxFileSize();
+        if ($maxFileSize) {
+            $config['maxFileSize'] = $maxFileSize;
+        }
 
         $acceptedFileTypes = $this->getAcceptedFileTypes();
         if (!empty($acceptedFileTypes)) {
@@ -579,7 +582,19 @@ class FilePondField extends AbstractUploadField
      */
     public function getMaxFileSize()
     {
-        return str_replace(' ', '', File::format_size($this->getValidator()->getAllowedMaxFileSize()));
+        $size = $this->getValidator()->getAllowedMaxFileSize();
+        if (!$size) {
+            return '';
+        }
+
+        // Only supports KB and MB
+        if ($size < 1024 * 1024) {
+            $size = round($size / 1024) . ' KB';
+        } else {
+            $size = round($size / (1024 * 1024)) . ' MB';
+        }
+
+        return str_replace(' ', '', $size);
     }
 
     /**
