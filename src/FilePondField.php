@@ -955,6 +955,13 @@ class FilePondField extends AbstractUploadField
         foreach ($patch as $filename) {
             $size += filesize($filename);
         }
+
+        // check if we are above our size limit
+        $maxAllowedSize = $this->getValidator()->getAllowedMaxFileSize();
+        if ($maxAllowedSize && $size > $maxAllowedSize) {
+            return $this->httpError(400, "File must not be larger than " . $this->getMaxFileSize());
+        }
+
         // if total size equals length of file we have gathered all patch files
         if ($size >= $length) {
             // create output file
@@ -1010,6 +1017,12 @@ class FilePondField extends AbstractUploadField
             $file = $this->getFileByID($id);
             // since we don't go through our upload object, call extension manually
             $file->extend('onAfterUpload');
+
+            // Cleanup temp files
+            $patch = glob($filePath . '.patch.*');
+            foreach ($patch as $filename) {
+                unlink($filename);
+            }
         }
         $response = new HTTPResponse('', 204);
         return $response;
