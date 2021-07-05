@@ -9,17 +9,3 @@ LeKoala\FilePond\FilePondField:
 SilverStripe\Assets\File:
   extensions:
     - LeKoala\FilePond\FilePondFileExtension
----
-Name: filepond-simpler
-After: "#simpler_silverstripe"
-Only:
-  moduleexists: "restruct/silverstripe-simpler"
----
-SilverStripe\Admin\LeftAndMain:
-  extra_requirements_javascript:
-    - 'lekoala/silverstripe-filepond:javascript/bundle.js'
-    - 'lekoala/silverstripe-filepond:javascript/FilePondField.js'
-  extra_requirements_css:
-    - 'lekoala/silverstripe-filepond:javascript/bundle.css'
-LeKoala\FilePond\FilePondField:
-  enable_ajax_init: false

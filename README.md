@@ -215,7 +215,25 @@ an array of options (for simple configs) or a string that should be the name of 
 
 ## Simpler SilverStripe support
 
-If you use [Simpler SilverStripe](https://github.com/restruct/silverstripe-simpler), this module will use `DOMNodesInserted` and disable custom ajax support.
+If you use [Simpler SilverStripe](https://github.com/restruct/silverstripe-simpler), you can use the following config.
+You can use the cdn or the bundled files or provide your own version of the assets.
+
+```yml
+---
+Name: filepond-simpler
+After: "#simpler_silverstripe"
+Only:
+  moduleexists: "restruct/silverstripe-simpler"
+---
+SilverStripe\Admin\LeftAndMain:
+  extra_requirements_javascript:
+    - 'lekoala/silverstripe-filepond:javascript/bundle.js'
+    - 'lekoala/silverstripe-filepond:javascript/FilePondField.js'
+  extra_requirements_css:
+    - 'lekoala/silverstripe-filepond:javascript/bundle.css'
+LeKoala\FilePond\FilePondField:
+  enable_ajax_init: false
+```
 
 ## Config flags
 
