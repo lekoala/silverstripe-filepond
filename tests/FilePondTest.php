@@ -12,6 +12,7 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Assets\Upload_Validator;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\View\Requirements;
 
 /**
  * Tests for FilePond module
@@ -28,13 +29,13 @@ class FilePondTest extends SapphireTest
         Test_FilePondModel::class,
     );
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         Upload_Validator::config()->set('default_max_file_size', '5MB');
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
     }
@@ -97,33 +98,33 @@ class FilePondTest extends SapphireTest
         $pond = $this->getPond();
         $pond->setName("Image");
         $pond->Field(); // mock call to trigger default
-        $this->assertContains("1080x1080px", $pond->getDescription());
-        $this->assertContains("min", strtolower($pond->getDescription()));
+        $this->assertStringContainsString("1080x1080px", $pond->getDescription());
+        $this->assertStringContainsString("min", strtolower($pond->getDescription()));
 
         // can set a max res
         $pond = $this->getPond();
         $pond->setName("SmallImage");
         $pond->Field(); // mock call to trigger default
-        $this->assertContains("512x512px", $pond->getDescription());
-        $this->assertContains("max", strtolower($pond->getDescription()));
+        $this->assertStringContainsString("512x512px", $pond->getDescription());
+        $this->assertStringContainsString("max", strtolower($pond->getDescription()));
 
         // we don't specify extensions by default
         $pond = $this->getPond();
         $pond->Field(); // mock call to trigger default
-        $this->assertNotContains("extensions", (string)$pond->getDescription());
+        $this->assertStringNotContainsString("extensions", (string)$pond->getDescription());
 
         // image have default type jpg, jpeg, png
         $pond = $this->getPond();
         $pond->setName("Image");
         $pond->Field(); // mock call to trigger default
-        $this->assertContains("extensions", $pond->getDescription());
+        $this->assertStringContainsString("extensions", $pond->getDescription());
 
         // but we do if we have a small list
         $pond = $this->getPond();
         $pond->setName("Image");
         $pond->setAllowedExtensions(['jpg', 'jpeg']);
         $pond->Field(); // mock call to trigger default
-        $this->assertContains("jpg", $pond->getDescription());
+        $this->assertStringContainsString("jpg", $pond->getDescription());
     }
 
     public function testGetAcceptedFileTypes()
@@ -190,8 +191,14 @@ class FilePondTest extends SapphireTest
     {
         FilePondField::config()->use_cdn = true;
         FilePondField::Requirements();
+        $files = array_keys(Requirements::backend()->getJavascript());
+        $this->assertContains("https://cdn.jsdelivr.net/gh/pqina/filepond/dist/filepond.min.js", $files);
+
+        Requirements::clear();
         FilePondField::config()->use_cdn = false;
         FilePondField::Requirements();
+        $files = array_keys(Requirements::backend()->getJavascript());
+        $this->assertNotContains("https://cdn.jsdelivr.net/gh/pqina/filepond/dist/filepond.min.js", $files);
     }
 
     public function testImageSizes()
