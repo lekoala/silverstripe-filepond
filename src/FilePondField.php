@@ -19,14 +19,12 @@ use SilverStripe\Versioned\Versioned;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\ORM\ValidationException;
-use SilverStripe\Core\Manifest\ModuleResourceLoader;
 
 /**
  * A FilePond field
  */
 class FilePondField extends AbstractUploadField
 {
-    const BASE_CDN = "https://cdn.jsdelivr.net/gh/pqina";
     const IMAGE_MODE_MIN = "min";
     const IMAGE_MODE_MAX = "max";
     const IMAGE_MODE_CROP = "crop";
@@ -55,31 +53,7 @@ class FilePondField extends AbstractUploadField
      * @config
      * @var boolean
      */
-    private static $enable_validation = true;
-
-    /**
-     * @config
-     * @var boolean
-     */
     private static $enable_poster = false;
-
-    /**
-     * @config
-     * @var boolean
-     */
-    private static $enable_image = false;
-
-    /**
-     * @config
-     * @var boolean
-     */
-    private static $enable_polyfill = true;
-
-    /**
-     * @config
-     * @var boolean
-     */
-    private static $enable_ajax_init = true;
 
     /**
      * @config
@@ -104,18 +78,6 @@ class FilePondField extends AbstractUploadField
      * @var int
      */
     private static $auto_clear_threshold = true;
-
-    /**
-     * @config
-     * @var boolean
-     */
-    private static $use_cdn = true;
-
-    /**
-     * @config
-     * @var boolean
-     */
-    private static $use_bundle = false;
 
     /**
      * @config
@@ -492,6 +454,11 @@ class FilePondField extends AbstractUploadField
         if (is_numeric($value)) {
             $value = ['Files' => [$value]];
         } elseif (is_array($value) && empty($value['Files'])) {
+            // make sure we don't assign {"name":"","full_path":"","type":"","tmp_name":"","error":4,"size":0}
+            // if $_FILES is not empty
+            if (isset($value['tmp_name'])) {
+                $value = null;
+            }
             $value = ['Files' => $value];
         }
         // Track existing record data
@@ -674,81 +641,42 @@ class FilePondField extends AbstractUploadField
     }
 
     /**
-     * Requirements are NOT versioned since filepond is regularly updated
-     *
      * @return void
      */
     public static function Requirements()
     {
-        $baseDir = self::BASE_CDN;
-        if (!self::config()->use_cdn || self::config()->use_bundle) {
-            // We need some kind of base url to serve as a starting point
-            $asset = ModuleResourceLoader::resourceURL('lekoala/silverstripe-filepond:javascript/FilePondField.js');
-            $baseDir = dirname($asset) . "/cdn";
-        }
-        $baseDir = rtrim($baseDir, '/');
+        // It includes css styles already
+        Requirements::javascript('lekoala/silverstripe-filepond: javascript/filepond-input.min.js');
+    }
 
-        // It will load everything regardless of enabled plugins
-        if (self::config()->use_bundle) {
-            Requirements::css('lekoala/silverstripe-filepond:javascript/bundle.css');
-            Requirements::javascript('lekoala/silverstripe-filepond:javascript/bundle.js');
-        } else {
-            // Polyfill to ensure max compatibility
-            if (self::config()->enable_polyfill) {
-                Requirements::javascript("$baseDir/filepond-polyfill/dist/filepond-polyfill.min.js");
-            }
+    public function getAttributes()
+    {
+        $attrs = parent::getAttributes();
 
-            // File/image validation plugins
-            if (self::config()->enable_validation) {
-                Requirements::javascript("$baseDir/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js");
-                Requirements::javascript("$baseDir/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js");
-                Requirements::javascript("$baseDir/filepond-plugin-image-validate-size/dist/filepond-plugin-image-validate-size.min.js");
-            }
+        $attrs['name'] = $this->getName();
 
-            // Poster plugins
-            if (self::config()->enable_poster) {
-                Requirements::javascript("$baseDir/filepond-plugin-file-metadata/dist/filepond-plugin-file-metadata.min.js");
-                Requirements::css("$baseDir/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.css");
-                Requirements::javascript("$baseDir/filepond-plugin-file-poster/dist/filepond-plugin-file-poster.min.js");
-            }
-
-            // Image plugins
-            if (self::config()->enable_image) {
-                Requirements::javascript("$baseDir/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.min.js");
-                Requirements::css("$baseDir/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css");
-                Requirements::javascript("$baseDir/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js");
-                Requirements::javascript("$baseDir/filepond-plugin-image-transform/dist/filepond-plugin-image-transform.min.js");
-                Requirements::javascript("$baseDir/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.min.js");
-                Requirements::javascript("$baseDir/filepond-plugin-image-crop/dist/filepond-plugin-image-crop.min.js");
-            }
-
-            // Base elements
-            Requirements::javascript("$baseDir/filepond-plugin-file-rename/dist/filepond-plugin-file-rename.min.js");
-            Requirements::css("$baseDir/filepond/dist/filepond.min.css");
-            Requirements::javascript("$baseDir/filepond/dist/filepond.min.js");
-        }
-
-        // Our custom init
-        Requirements::javascript('lekoala/silverstripe-filepond:javascript/FilePondField.js');
-
-        // In the cms, init will not be triggered
-        // Or you could use simpler instead
-        if (self::config()->enable_ajax_init && Director::is_ajax()) {
-            Requirements::javascript('lekoala/silverstripe-filepond:javascript/FilePondField-init.js?t=' . time());
-        }
+        return $attrs;
     }
 
     public function FieldHolder($properties = array())
     {
-        $config = $this->getFilePondConfig();
-
-        $this->setAttribute('data-config', json_encode($config));
-
         if (self::config()->enable_requirements) {
             self::Requirements();
         }
 
         return parent::FieldHolder($properties);
+    }
+
+    public function Field($properties = array())
+    {
+        $html = parent::Field($properties);
+
+        $config = $this->getFilePondConfig();
+
+        // Simply wrap with custom element and set config
+        $html = "<filepond-input data-config='" . json_encode($config) . "'>" . $html . '</filepond-input>';
+
+        return $html;
     }
 
     /**
@@ -1182,7 +1110,9 @@ class FilePondField extends AbstractUploadField
         }
 
         // Proceed
-        return parent::saveInto($record);
+        parent::saveInto($record);
+
+        return $this;
     }
 
     public function Type()

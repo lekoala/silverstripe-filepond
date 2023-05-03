@@ -1,4 +1,0 @@
-(function () {
-    initFilePond();
-    attachFilePond();
-})();

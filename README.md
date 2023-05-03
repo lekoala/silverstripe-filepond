@@ -196,44 +196,13 @@ You can also enable this globally with `chunk_by_default`.
 
 ## Requirements
 
-In order to provide a working out of the box experience, js requirements are loaded from cdn or the local javascript folder
-and the FilePondFields are initialized by the FilePondField.js script.
-
-However, if you happen to include FilePond on your own (because you use webpack or any kind of bundler), you can disable this behaviour by setting
-`enable_requirements` to `false`. You can have a look at FilePondField.js to see how to initialize the script properly.
-
-There is an additionnal little javascript file to help with dealing with init after an ajax like (like in the Admin).
-It is enabled by default and controlled by the `enable_ajax_init` flag.
-
-You can also use bundled files instead of separate files with `use_bundle`. This will locally bundled files (not the cdn).
-Warning: all plugins are included, regardless of those that are activated in the config.
+In order to provide a working out of the box experience, Filepond is provided as a custom element imported from
+https://github.com/lekoala/formidable-elements
 
 ## Custom server config
 
 If for some reason you use a custom endpoint for your FilePond, you can use the `setCustomServerConfig`. You can pass
 an array of options (for simple configs) or a string that should be the name of a global js handler.
-
-## Simpler SilverStripe support
-
-If you use [Simpler SilverStripe](https://github.com/restruct/silverstripe-simpler), you can use the following config.
-You can use the cdn or the bundled files or provide your own version of the assets.
-
-```yml
----
-Name: filepond-simpler
-After: "#simpler_silverstripe"
-Only:
-  moduleexists: "restruct/silverstripe-simpler"
----
-SilverStripe\Admin\LeftAndMain:
-  extra_requirements_javascript:
-    - 'lekoala/silverstripe-filepond:javascript/bundle.js'
-    - 'lekoala/silverstripe-filepond:javascript/FilePondField.js'
-  extra_requirements_css:
-    - 'lekoala/silverstripe-filepond:javascript/bundle.css'
-LeKoala\FilePond\FilePondField:
-  enable_ajax_init: false
-```
 
 ## Config flags
 
@@ -245,14 +214,8 @@ LeKoala\FilePond\FilePondField:
   auto_clear_threshold: null #defaults to 1 day in prod env
   enable_default_description: true
   enable_requirements: true
-  enable_validation: true
   enable_poster: false
-  enable_image: false
-  enable_polyfill: true
-  enable_ajax_init: true
   chunk_by_default: false
-  use_cdn: true
-  use_bundle: false
   enable_auto_thumbnails: true
   poster_width: 352
   poster_height: 264
@@ -268,7 +231,7 @@ This module is kindly sponsored by [RESTRUCT](restruct.nl)
 
 ## Compatibility
 
-Tested with 4.5 to 4.8 but should work on any 4.x projects
+Tested with 4.5 to 4.13 but should work on any 4.x projects
 
 ## Maintainer
 

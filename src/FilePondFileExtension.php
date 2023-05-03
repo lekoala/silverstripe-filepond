@@ -21,9 +21,8 @@ class FilePondFileExtension extends DataExtension
     ];
 
     /**
-     * Get a list of files for the given DataObject
-     *
-     * This is just a convenience method, not a public api
+     * Get a list of files uploaded the given DataObject
+     * It doesn't mean that the files are currently or still associated!!
      *
      * @param DataObject $record
      * @return DataList|File[]

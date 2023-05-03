@@ -52,8 +52,7 @@
     "scripts": {
         "lint": "phpcs src/ tests/",
         "lint-clean": "phpcbf src/ tests/",
-        "test": "phpunit -v",
-        "build": "php bin/download-cdn-files.php"
+        "test": "phpunit -v"
     },
     "minimum-stability": "dev",
     "prefer-stable": true
