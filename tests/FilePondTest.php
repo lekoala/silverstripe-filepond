@@ -40,15 +40,19 @@ class FilePondTest extends SapphireTest
         parent::tearDown();
     }
 
-    public function getPond()
+    public function getPondForm()
     {
         $controller = Controller::curr();
         $controller->config()->set('url_segment', 'test_controller');
         $form = new Form($controller);
+        return $form;
+    }
 
+    public function getPond()
+    {
         $uploader = new FilePondField('TestUpload');
         $uploader->setRecord($this->getTestModel());
-        $uploader->setForm($form);
+        $uploader->setForm($this->getPondForm());
         return $uploader;
     }
 
@@ -82,6 +86,7 @@ class FilePondTest extends SapphireTest
     {
         // uploaders without records don't have a description
         $pond = new FilePondField('TestUpload');
+        $pond->setForm($this->getPondForm());
         $pond->Field(); // mock call to trigger default
         $this->assertEmpty($pond->getDescription());
 
@@ -189,16 +194,9 @@ class FilePondTest extends SapphireTest
 
     public function testRequirements()
     {
-        FilePondField::config()->use_cdn = true;
         FilePondField::Requirements();
         $files = array_keys(Requirements::backend()->getJavascript());
-        $this->assertContains("https://cdn.jsdelivr.net/gh/pqina/filepond/dist/filepond.min.js", $files);
-
-        Requirements::clear();
-        FilePondField::config()->use_cdn = false;
-        FilePondField::Requirements();
-        $files = array_keys(Requirements::backend()->getJavascript());
-        $this->assertNotContains("https://cdn.jsdelivr.net/gh/pqina/filepond/dist/filepond.min.js", $files);
+        $this->assertContains("filepond\\javascript\\filepond-input.min.js", $files);
     }
 
     public function testImageSizes()
