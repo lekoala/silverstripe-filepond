@@ -196,7 +196,7 @@ class FilePondTest extends SapphireTest
     {
         FilePondField::Requirements();
         $files = array_keys(Requirements::backend()->getJavascript());
-        $this->assertContains("filepond\\javascript\\filepond-input.min.js", $files);
+        $this->assertContains("filepond\\javascript\\filepond-input.min.js", $files, "It contains : " . json_encode($files));
     }
 
     public function testImageSizes()
