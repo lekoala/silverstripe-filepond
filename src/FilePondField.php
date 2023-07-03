@@ -369,14 +369,9 @@ class FilePondField extends AbstractUploadField
      */
     public function getFilePondConfig()
     {
+        $this->fixName();
         $name = $this->getName();
         $multiple = $this->getIsMultiUpload();
-
-        // Multi uploads need []
-        if ($multiple && strpos($name, '[]') === false) {
-            $name .= '[]';
-            $this->setName($name);
-        }
 
         $i18nConfig = [
             'labelIdle' => _t('FilePondField.labelIdle', 'Drag & Drop your files or <span class="filepond--label-action"> Browse </span>'),
@@ -461,7 +456,6 @@ class FilePondField extends AbstractUploadField
             }
             $value = ['Files' => $value];
         }
-        // Track existing record data
         if ($record) {
             $name = $this->name;
             if ($record instanceof DataObject && $record->hasMethod($name)) {
@@ -653,9 +647,25 @@ class FilePondField extends AbstractUploadField
     {
         $attrs = parent::getAttributes();
 
+        $this->fixName();
         $attrs['name'] = $this->getName();
 
         return $attrs;
+    }
+
+    /**
+     * Make sure the name is correct
+     */
+    protected function fixName()
+    {
+        $name = $this->getName();
+        $multiple = $this->getIsMultiUpload();
+
+        // Multi uploads need []
+        if ($multiple && strpos($name, '[]') === false) {
+            $name .= '[]';
+            $this->setName($name);
+        }
     }
 
     public function FieldHolder($properties = array())
