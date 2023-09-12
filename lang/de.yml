@@ -1,0 +1,15 @@
+de:
+  FilePondField:
+    ErrorMaxFilesReached:
+      one: 'Sie können nur {count} Datei hochladen.'
+      other: 'Sie können nur {count} Dateien hochladen.'
+    labelFileProcessing: 'Upload läuft'
+    labelFileProcessingAborted: 'Upload abgebrochen'
+    labelFileProcessingComplete: 'Upload abgeschlossen'
+    labelIdle: 'Dateien per Drag & Drop ablegen oder <span class="filepond--label-action"> auswählen </span>'
+    labelTapToCancel: 'abbrechen'
+  ImprovedUploader:
+    ALLOWEXTENSION: 'Erlaubte Dateitypen: {ext}'
+    MINRESOLUTION: 'Min. Auflösung: {size}px'
+    MAXRESOLUTION: 'Max. Aufläsung: {size}px'
+    MAXSIZE: 'Max. Dateigröße: {size}'
