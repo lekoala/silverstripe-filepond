@@ -3,6 +3,7 @@
 namespace LeKoala\FilePond;
 
 use LogicException;
+use SilverStripe\Forms\Form;
 use SilverStripe\ORM\SS_List;
 use SilverStripe\Assets\Image;
 use SilverStripe\Assets\Folder;
@@ -15,6 +16,7 @@ use SilverStripe\Control\HTTPResponse;
 use SilverStripe\Forms\FileHandleField;
 use SilverStripe\Control\NullHTTPRequest;
 use SilverStripe\Forms\FileUploadReceiver;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 
 /**
@@ -31,10 +33,17 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
     use FileUploadReceiver;
     use ImprovedUploader;
 
-    // Schema needs to be something else than custom otherwise it fails on ajax load because
-    // we don't have a proper react component
+    /**
+     * Schema needs to be something else than custom otherwise it fails on ajax load because
+     * we don't have a proper react component
+     * @var string
+     */
     protected $schemaDataType = FormField::SCHEMA_DATA_TYPE_HIDDEN;
-    protected $schemaComponent = null;
+
+    /**
+     * @var string
+     */
+    protected $schemaComponent;
 
     /**
      * Set if uploading new files is enabled.
@@ -97,12 +106,18 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getSchemaDataDefaults()
     {
         $defaults = parent::getSchemaDataDefaults();
 
+        /** @var Form|null $form */
+        $form = $this->form;
+
         // NEW : wrap conditionnaly to avoid errors if not linked to a form
-        if ($this->form) {
+        if ($form) {
             $uploadLink = $this->Link('upload');
             $defaults['data']['createFileEndpoint'] = [
                 'url' => $uploadLink,
@@ -145,6 +160,9 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
         return $folder ? $folder->ID : 0;
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function getSchemaStateDefaults()
     {
         $state = parent::getSchemaStateDefaults();
@@ -164,6 +182,7 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
             return $this->multiUpload;
         }
         // Guess from record
+        /** @var DataObject|null $record */
         $record = $this->getRecord();
         $name = $this->getName();
 
@@ -218,7 +237,7 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
 
     /**
      * Sets the number of files allowed for this field
-     * @param $count
+     * @param int $count
      * @return $this
      */
     public function setAllowedMaxFileNumber($count)
@@ -228,6 +247,9 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
         return $this;
     }
 
+    /**
+     * @return array<string,mixed>
+     */
     public function getAttributes()
     {
         $attributes = array(
@@ -246,6 +268,9 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
         return $attributes;
     }
 
+    /**
+     * @return string
+     */
     public function Type()
     {
         return 'file';
@@ -327,7 +352,7 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
      * Set if attaching files is enabled
      *
      * @param bool $attachEnabled
-     * @return UploadField
+     * @return AbstractUploadField
      */
     public function setAttachEnabled($attachEnabled)
     {
@@ -335,8 +360,13 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
         return $this;
     }
 
+    /**
+     * @param array<mixed> $properties
+     * @return DBHTMLText
+     */
     public function Field($properties = array())
     {
+        /** @var DataObject|null $record */
         $record = $this->getRecord();
         if ($record) {
             $relation = $record->getRelationClass($this->name);
@@ -367,9 +397,9 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
      */
     public function getFolderName()
     {
-        return ($this->folderName !== false)
-            ? $this->folderName
-            : $this->getDefaultFolderName();
+        /** @var bool $hasFolder */
+        $hasFolder = ($this->folderName !== false);
+        return $hasFolder ? $this->folderName : $this->getDefaultFolderName();
     }
 
     /**
@@ -377,13 +407,16 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
      */
     public function Link($action = null)
     {
-        if (!$this->form) {
+        /** @var Form|null $form */
+        $form = $this->form;
+
+        if (!$form) {
             throw new LogicException(
                 'Field must be associated with a form to call Link(). Please use $field->setForm($form);'
             );
         }
         $name = $this->getSafeName();
-        $link = Controller::join_links($this->form->FormAction(), 'field/' . $name, $action);
+        $link = Controller::join_links($form->FormAction(), 'field/' . $name, $action);
         $this->extend('updateLink', $link, $action);
         return $link;
     }

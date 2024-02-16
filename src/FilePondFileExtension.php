@@ -8,12 +8,21 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\AssetAdmin\Controller\AssetAdmin;
 
+/**
+ * @property File $owner
+ */
 class FilePondFileExtension extends DataExtension
 {
+    /**
+     * @var array<string,string>
+     */
     private static $db = [
         // This helps tracking state of files uploaded through ajax uploaders
         "IsTemporary" => "Boolean",
     ];
+    /**
+     * @var array<string,string>
+     */
     private static $has_one = [
         // Record is already used by versioned extensions
         // ChangeSetItem already uses Object convention so we use the same

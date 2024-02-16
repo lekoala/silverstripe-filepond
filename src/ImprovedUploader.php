@@ -35,7 +35,7 @@ trait ImprovedUploader
      * will accept all images. ['image/png', 'image/jpeg']
      * will only accepts PNGs and JPEGs.
      *
-     * @return array
+     * @return array<string>
      */
     public function getAcceptedFileTypes()
     {
@@ -208,7 +208,7 @@ trait ImprovedUploader
      * A simple alias that makes the IDE happy
      *
      * @param int $ID
-     * @return File|Image
+     * @return File|Image|null
      */
     protected function getFileByID($ID)
     {

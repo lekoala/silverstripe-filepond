@@ -5,6 +5,7 @@ namespace LeKoala\FilePond;
 use Exception;
 use LogicException;
 use RuntimeException;
+use SilverStripe\Forms\Form;
 use SilverStripe\Assets\File;
 use SilverStripe\ORM\SS_List;
 use SilverStripe\Assets\Image;
@@ -19,6 +20,7 @@ use SilverStripe\Versioned\Versioned;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\ORM\DataObjectInterface;
 use SilverStripe\ORM\ValidationException;
+use SilverStripe\ORM\FieldType\DBHTMLText;
 
 /**
  * A FilePond field
@@ -35,7 +37,7 @@ class FilePondField extends AbstractUploadField
 
     /**
      * @config
-     * @var array
+     * @var array<string>
      */
     private static $allowed_actions = [
         'upload',
@@ -75,7 +77,7 @@ class FilePondField extends AbstractUploadField
 
     /**
      * @config
-     * @var int
+     * @var bool
      */
     private static $auto_clear_threshold = true;
 
@@ -98,22 +100,22 @@ class FilePondField extends AbstractUploadField
     private static $poster_height = 264;
 
     /**
-     * @var array
+     * @var array<string|int,mixed|null>
      */
     protected $filePondConfig = [];
 
     /**
-     * @var array
+     * @var array<string,mixed>|null
      */
     protected $customServerConfig = null;
 
     /**
-     * @var int
+     * @var ?int
      */
     protected $posterHeight = null;
 
     /**
-     * @var int
+     * @var ?int
      */
     protected $posterWidth = null;
 
@@ -138,7 +140,7 @@ class FilePondField extends AbstractUploadField
      *
      * @link https://pqina.nl/filepond/docs/patterns/api/filepond-instance/#properties
      * @param string $k
-     * @param string|bool|array $v
+     * @param string|bool|float|int|array<mixed> $v
      * @return $this
      */
     public function addFilePondConfig($k, $v)
@@ -163,7 +165,7 @@ class FilePondField extends AbstractUploadField
     /**
      * Custom configuration applied to this field
      *
-     * @return array
+     * @return array<mixed>
      */
     public function getCustomFilePondConfig()
     {
@@ -184,7 +186,7 @@ class FilePondField extends AbstractUploadField
 
     /**
      * Get the value of customServerConfig
-     * @return array
+     * @return array<mixed>
      */
     public function getCustomServerConfig()
     {
@@ -194,7 +196,7 @@ class FilePondField extends AbstractUploadField
     /**
      * Set the value of customServerConfig
      *
-     * @param array $customServerConfig
+     * @param array<mixed> $customServerConfig
      * @return $this
      */
     public function setCustomServerConfig(array $customServerConfig)
@@ -224,8 +226,8 @@ class FilePondField extends AbstractUploadField
     }
 
     /**
-     * @param array $sizes
-     * @return array
+     * @param array<mixed> $sizes
+     * @return array<mixed>
      */
     public function getImageSizeConfigFromArray($sizes)
     {
@@ -240,7 +242,7 @@ class FilePondField extends AbstractUploadField
      * @param int $width
      * @param int $height
      * @param string $mode min|max|crop|resize|crop_resize
-     * @return array
+     * @return array<mixed>
      */
     public function getImageSizeConfig($width, $height, $mode = null)
     {
@@ -334,7 +336,8 @@ class FilePondField extends AbstractUploadField
         } else {
             // Adjust width to keep aspect ratio with our default height
             $ratio = $height / self::getDefaultPosterHeight();
-            $this->posterWidth = $width / $ratio;
+            //@phpstan-ignore-next-line
+            $this->posterWidth = round($width / $ratio);
         }
     }
 
@@ -365,7 +368,7 @@ class FilePondField extends AbstractUploadField
      *
      * Typically converted to json and set in a data attribute
      *
-     * @return array
+     * @return array<string,mixed>
      */
     public function getFilePondConfig()
     {
@@ -408,6 +411,7 @@ class FilePondField extends AbstractUploadField
         }
 
         // image validation/crop based on record
+        /** @var DataObject|null $record */
         $record = $this->getForm()->getRecord();
         if ($record) {
             $sizes = $record->config()->image_sizes;
@@ -429,19 +433,27 @@ class FilePondField extends AbstractUploadField
     /**
      * Compute best size for chunks based on server settings
      *
-     * @return int
+     * @return float
      */
     protected function computeMaxChunkSize()
     {
-        $maxUpload = Convert::memstring2bytes(ini_get('upload_max_filesize'));
-        $maxPost = Convert::memstring2bytes(ini_get('post_max_size'));
+        $upload_max_filesize = ini_get('upload_max_filesize');
+        $post_max_size = ini_get('post_max_size');
+
+        $upload_max_filesize = $upload_max_filesize ? $upload_max_filesize : "2MB";
+        $post_max_size = $post_max_size ? $post_max_size : "2MB";
+
+        $maxUpload = Convert::memstring2bytes($upload_max_filesize);
+        $maxPost = Convert::memstring2bytes($post_max_size);
 
         // ~90%, allow some overhead
         return round(min($maxUpload, $maxPost) * 0.9);
     }
 
     /**
-     * @inheritDoc
+     * @param array<mixed>|int|string $value
+     * @param DataObject|array<string,mixed> $record
+     * @return $this
      */
     public function setValue($value, $record = null)
     {
@@ -469,14 +481,25 @@ class FilePondField extends AbstractUploadField
                 }
             }
         }
+        //@phpstan-ignore-next-line
         return parent::setValue($value, $record);
+    }
+
+    /**
+     * Get the currently used form.
+     *
+     * @return Form|null
+     */
+    public function getForm()
+    {
+        return $this->form;
     }
 
     /**
      * Configure our endpoint
      *
      * @link https://pqina.nl/filepond/docs/patterns/api/server/
-     * @return array
+     * @return array<mixed>
      */
     public function getServerOptions()
     {
@@ -513,12 +536,13 @@ class FilePondField extends AbstractUploadField
      * onerror : Called when server error is received, receis the response body, useful to select the relevant error data
      *
      * @param string $action
-     * @return array
+     * @return array<mixed>
      */
     protected function getLinkParameters($action)
     {
         $form = $this->getForm();
         $token = $form->getSecurityToken()->getValue();
+        /** @var DataObject|null $record */
         $record = $form->getRecord();
 
         $headers = [
@@ -562,7 +586,7 @@ class FilePondField extends AbstractUploadField
      * Set initial values to FilePondField
      * See: https://pqina.nl/filepond/docs/patterns/api/filepond-object/#setting-initial-files
      *
-     * @return array
+     * @return array<mixed>
      */
     public function getExistingUploadsData()
     {
@@ -574,7 +598,7 @@ class FilePondField extends AbstractUploadField
 
         $existingUploads = [];
         foreach ($fileIDarray['Files'] as $fileID) {
-            /* @var $file File */
+            /** @var File|null $file */
             $file = File::get()->byID($fileID);
             if (!$file) {
                 continue;
@@ -607,6 +631,7 @@ class FilePondField extends AbstractUploadField
                 if ($this->posterHeight) {
                     $h = $this->posterHeight;
                 }
+                /** @var Image|null $resizedImage */
                 $resizedImage = $file->Fill($w, $h);
                 if ($resizedImage) {
                     $poster = $resizedImage->getAbsoluteURL();
@@ -655,6 +680,7 @@ class FilePondField extends AbstractUploadField
 
     /**
      * Make sure the name is correct
+     * @return void
      */
     protected function fixName()
     {
@@ -668,15 +694,22 @@ class FilePondField extends AbstractUploadField
         }
     }
 
+    /**
+     * @param array<string,mixed> $properties
+     * @return DBHTMLText
+     */
     public function FieldHolder($properties = array())
     {
         if (self::config()->enable_requirements) {
             self::Requirements();
         }
-
         return parent::FieldHolder($properties);
     }
 
+    /**
+     * @param array<mixed> $properties
+     * @return DBHTMLText|string
+     */
     public function Field($properties = array())
     {
         $html = parent::Field($properties);
@@ -693,7 +726,7 @@ class FilePondField extends AbstractUploadField
      * Check the incoming request
      *
      * @param HTTPRequest $request
-     * @return array
+     * @return array<mixed>
      */
     public function prepareUpload(HTTPRequest $request)
     {
@@ -741,15 +774,15 @@ class FilePondField extends AbstractUploadField
     {
         // Mark as temporary until properly associated with a record
         // Files will be unmarked later on by saveInto method
-        $file->IsTemporary = true;
+        $file->IsTemporary = true; //@phpstan-ignore-line
 
         // We can also track the record
         $RecordID = $request->getHeader('X-RecordID');
         $RecordClassName = $request->getHeader('X-RecordClassName');
-        if (!$file->ObjectID) {
+        if (!$file->ObjectID) { //@phpstan-ignore-line
             $file->ObjectID = $RecordID;
         }
-        if (!$file->ObjectClass) {
+        if (!$file->ObjectClass) { //@phpstan-ignore-line
             $file->ObjectClass = $RecordClassName;
         }
 
@@ -793,16 +826,18 @@ class FilePondField extends AbstractUploadField
         // Handle upload errors
         if ($error) {
             $this->getUpload()->clearErrors();
-            return $this->httpError(400, json_encode($error));
+            $jsonError = json_encode($error);
+            $jsonError = $jsonError ? $jsonError : json_last_error_msg();
+            return $this->httpError(400, $jsonError);
         }
 
         // File can be an AssetContainer and not a DataObject
         if ($file instanceof DataObject) {
-            $this->setFileDetails($file, $request);
+            $this->setFileDetails($file, $request); //@phpstan-ignore-line
         }
 
         $this->getUpload()->clearErrors();
-        $fileId = $file->ID;
+        $fileId = $file->ID; //@phpstan-ignore-line
         $this->trackFileID($fileId);
 
         if (self::config()->auto_clear_temp_folder) {
@@ -844,7 +879,7 @@ class FilePondField extends AbstractUploadField
             $this->setFileDetails($file, $request);
             $fileId = $file->ID;
             $this->trackFileID($fileId);
-            $response = new HTTPResponse($fileId, 200);
+            $response = new HTTPResponse((string)$fileId, 200);
             $response->addHeader('Content-Type', 'text/plain');
             return $response;
         }
@@ -860,9 +895,9 @@ class FilePondField extends AbstractUploadField
                 $nextOffset++;
             }
 
-            $response = new HTTPResponse($nextOffset, 200);
+            $response = new HTTPResponse((string)$nextOffset, 200);
             $response->addHeader('Content-Type', 'text/plain');
-            $response->addHeader('Upload-Offset', $nextOffset);
+            $response->addHeader('Upload-Offset', (string)$nextOffset);
             return $response;
         }
 
@@ -890,8 +925,10 @@ class FilePondField extends AbstractUploadField
         // calculate total size of patches
         $size = 0;
         $patch = glob($filePath . '.patch.*');
-        foreach ($patch as $filename) {
-            $size += filesize($filename);
+        if ($patch) {
+            foreach ($patch as $filename) {
+                $size += filesize($filename);
+            }
         }
 
         // check if we are above our size limit
@@ -904,30 +941,37 @@ class FilePondField extends AbstractUploadField
         if ($size >= $length) {
             // create output file
             $outputFile = fopen($filePath, 'wb');
-            // write patches to file
-            foreach ($patch as $filename) {
-                // get offset from filename
-                list($dir, $offset) = explode('.patch.', $filename, 2);
-                // read patch and close
-                $patchFile = fopen($filename, 'rb');
-                $patchContent = fread($patchFile, filesize($filename));
-                fclose($patchFile);
+            if ($patch && $outputFile) {
+                // write patches to file
+                foreach ($patch as $filename) {
+                    // get offset from filename
+                    list($dir, $offset) = explode('.patch.', $filename, 2);
+                    // read patch and close
+                    $patchFile = fopen($filename, 'rb');
+                    $patchFileSize = filesize($filename);
+                    if ($patchFile && $patchFileSize) {
+                        $patchContent = fread($patchFile, $patchFileSize);
+                        if ($patchContent) {
+                            fclose($patchFile);
 
-                // apply patch
-                fseek($outputFile, (int) $offset);
-                fwrite($outputFile, $patchContent);
+                            // apply patch
+                            fseek($outputFile, (int) $offset);
+                            fwrite($outputFile, $patchContent);
+                        }
+                    }
+                }
+                // remove patches
+                foreach ($patch as $filename) {
+                    unlink($filename);
+                }
+                // done with file
+                fclose($outputFile);
             }
-            // remove patches
-            foreach ($patch as $filename) {
-                unlink($filename);
-            }
-            // done with file
-            fclose($outputFile);
 
             // Finalize real filename
 
             // We need to class this as it mutates the state and set the record if any
-            $relationClass = $this->getRelationAutosetClass(null);
+            $relationClass = $this->getRelationAutosetClass(File::class);
             $realFilename = $this->getFolderName() . "/" . $uploadName;
             if ($this->renamePattern) {
                 $realFilename = $this->changeFilenameWithPattern(
@@ -958,8 +1002,10 @@ class FilePondField extends AbstractUploadField
 
             // Cleanup temp files
             $patch = glob($filePath . '.patch.*');
-            foreach ($patch as $filename) {
-                unlink($filename);
+            if ($patch) {
+                foreach ($patch as $filename) {
+                    unlink($filename);
+                }
             }
         }
         $response = new HTTPResponse('', 204);
@@ -1055,11 +1101,12 @@ class FilePondField extends AbstractUploadField
     /**
      * Allows tracking uploaded ids to prevent unauthorized attachements
      *
-     * @param int $fileId
+     * @param int|string $fileId
      * @return void
      */
     public function trackFileID($fileId)
     {
+        $fileId = is_string($fileId) ? intval($fileId) : $fileId;
         $session = $this->getRequest()->getSession();
         $uploadedIDs = $this->getTrackedIDs();
         if (!in_array($fileId, $uploadedIDs)) {
@@ -1070,7 +1117,7 @@ class FilePondField extends AbstractUploadField
 
     /**
      * Get all authorized tracked ids
-     * @return array
+     * @return array<mixed>
      */
     public function getTrackedIDs()
     {
@@ -1101,6 +1148,7 @@ class FilePondField extends AbstractUploadField
         // Move files out of temporary folder
         foreach ($IDs as $ID) {
             $file = $this->getFileByID($ID);
+            //@phpstan-ignore-next-line
             if ($file && $file->IsTemporary) {
                 // The record does not have an ID which is a bad idea to attach the file to it
                 if (!$record->ID) {
@@ -1111,8 +1159,8 @@ class FilePondField extends AbstractUploadField
                     throw new ValidationException("Failed to authenticate owner");
                 }
                 $file->IsTemporary = false;
-                $file->ObjectID = $record->ID;
-                $file->ObjectClass = get_class($record);
+                $file->ObjectID = $record->ID; //@phpstan-ignore-line
+                $file->ObjectClass = get_class($record); //@phpstan-ignore-line
                 $file->write();
             } else {
                 // File was uploaded earlier, no need to do anything
@@ -1125,6 +1173,9 @@ class FilePondField extends AbstractUploadField
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function Type()
     {
         return 'filepond';
