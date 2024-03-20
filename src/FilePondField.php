@@ -670,12 +670,22 @@ class FilePondField extends AbstractUploadField
 
     public function getAttributes()
     {
-        $attrs = parent::getAttributes();
+        // don't use parent as it will include data-schema that we don'tt need
+        $attributes = array(
+            'class' => $this->extraClass(),
+            'type' => 'file',
+            'multiple' => $this->getIsMultiUpload(),
+            'id' => $this->ID(),
+        );
+
+        $attributes = array_merge($attributes, $this->attributes);
 
         $this->fixName();
-        $attrs['name'] = $this->getName();
+        $attributes['name'] = $this->getName();
 
-        return $attrs;
+        $this->extend('updateAttributes', $attributes);
+
+        return $attributes;
     }
 
     /**
