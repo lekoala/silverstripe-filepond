@@ -17,13 +17,12 @@ use SilverStripe\Forms\FileHandleField;
 use SilverStripe\Control\NullHTTPRequest;
 use SilverStripe\Forms\FileUploadReceiver;
 use SilverStripe\ORM\FieldType\DBHTMLText;
-use SilverStripe\AssetAdmin\Forms\UploadField;
 
 /**
  * An abstract class that serve as a base to implement dedicated uploaders
  *
- * This follows roughly the same pattern as the UploadField class
- * but does not depends on asset admin
+ * This follows roughly the same pattern as the main Silverstripe UploadField class
+ * but does not depend on asset admin.
  *
  * Copy pasted functions that were adapted are using NEW: comments on top of
  * the lines that are changed/added

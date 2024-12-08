@@ -30,6 +30,20 @@ LeKoala\FilePond\FilePondField:
 You can of course implement your own extension. As a bonus, you can toggle the `enable_auto_thumbnails`
 to `true` in order to get thumbnails for images in the cms.
 
+## Thumbnails
+
+If your project already includes `silverstripe/asset-admin` then thumbnails - if configured as above - will just work as expected.
+
+If you have no need for `silverstripe/asset-admin` and wish to implement your own thumbnail generator, then it can be configured like so in your project's YML config:
+
+```
+LeKoala\FilePond\FilePondFieldExtension:
+  dependencies:
+    thumbnailService: '%$\Path\To\My\ThumbnailGenerator'
+```
+
+**Note:** Your `ThumbnailGenerator` class needs to declare the familliar `generateThumbnail()` method in order to work.
+
 ## Temporary files
 
 Because files are upload in ajax, maybe they will never be used if the user never submit the form.

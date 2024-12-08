@@ -6,13 +6,17 @@ use SilverStripe\Assets\File;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataExtension;
-use SilverStripe\AssetAdmin\Controller\AssetAdmin;
 
 /**
  * @property File $owner
  */
 class FilePondFileExtension extends DataExtension
 {
+    /**
+     * @var null|\stdClass
+     */
+    protected $thumbnailService = null;
+
     /**
      * @var array<string,string>
      */
@@ -51,7 +55,11 @@ class FilePondFileExtension extends DataExtension
     public function onAfterUpload()
     {
         if (FilePondField::config()->enable_auto_thumbnails) {
-            $thumbs = AssetAdmin::create()->generateThumbnails($this->owner);
+            if (class_exists('\SilverStripe\AssetAdmin\Controller\AssetAdmin')) {
+                AssetAdmin::create()->generateThumbnails($this->owner);
+            } elseif ($this->thumbnailService) {
+                $this->thumbnailService->generateThumbnails($this->owner);
+            }
         }
     }
 }
