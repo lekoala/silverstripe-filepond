@@ -4,7 +4,6 @@ namespace LeKoala\FilePond;
 
 use LogicException;
 use SilverStripe\Forms\Form;
-use SilverStripe\ORM\SS_List;
 use SilverStripe\Assets\Image;
 use SilverStripe\Assets\Folder;
 use SilverStripe\ORM\DataObject;
@@ -18,6 +17,8 @@ use SilverStripe\Control\NullHTTPRequest;
 use SilverStripe\Forms\FileUploadReceiver;
 use SilverStripe\ORM\FieldType\DBHTMLText;
 use SilverStripe\AssetAdmin\Forms\UploadField;
+use SilverStripe\Core\Validation\ValidationResult;
+use SilverStripe\Model\List\SS_List;
 
 /**
  * An abstract class that serve as a base to implement dedicated uploaders
@@ -85,7 +86,7 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
      * @param string $title The field label.
      * @param SS_List $items Items assigned to this field
      */
-    public function __construct($name, $title = null, SS_List $items = null)
+    public function __construct($name, $title = null, ?SS_List $items = null)
     {
         $this->constructFileUploadReceiver();
 
@@ -167,7 +168,7 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
     {
         $state = parent::getSchemaStateDefaults();
         $state['data']['files'] = $this->getItemIDs();
-        $state['value'] = $this->Value() ?: ['Files' => []];
+        $state['value'] = $this->getValue() ?: ['Files' => []];
         return $state;
     }
 
@@ -292,28 +293,25 @@ abstract class AbstractUploadField extends FormField implements FileHandleField
 
     /**
      * Checks if the number of files attached adheres to the $allowedMaxFileNumber defined
-     *
-     * @param Validator $validator
-     * @return bool
      */
-    public function validate($validator)
+    public function validate(): ValidationResult
     {
+        $validator = parent::validate();
+
         $maxFiles = $this->getAllowedMaxFileNumber();
         $count = count($this->getItems());
 
-        if ($maxFiles < 1 || $count <= $maxFiles) {
-            return true;
+        if ($maxFiles > 1 && $count > $maxFiles) {
+            $validator->addFieldError($this->getName(), _t(
+                'FilePondField.ErrorMaxFilesReached',
+                'You can only upload {count} file.|You can only upload {count} files.',
+                [
+                    'count' => $maxFiles,
+                ]
+            ));
         }
 
-        $validator->validationError($this->getName(), _t(
-            'FilePondField.ErrorMaxFilesReached',
-            'You can only upload {count} file.|You can only upload {count} files.',
-            [
-                'count' => $maxFiles,
-            ]
-        ));
-
-        return false;
+        return $validator;
     }
 
     /**
