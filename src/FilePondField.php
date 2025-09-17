@@ -7,10 +7,8 @@ use LogicException;
 use RuntimeException;
 use SilverStripe\Forms\Form;
 use SilverStripe\Assets\File;
-use SilverStripe\ORM\SS_List;
 use SilverStripe\Assets\Image;
 use SilverStripe\Core\Convert;
-use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Control\Director;
 use SilverStripe\Security\Security;
@@ -19,21 +17,23 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\ORM\DataObjectInterface;
-use SilverStripe\ORM\ValidationException;
 use SilverStripe\ORM\FieldType\DBHTMLText;
+use SilverStripe\Model\List\SS_List;
+use SilverStripe\Model\List\ArrayList;
+use SilverStripe\Core\Validation\ValidationException;
 
 /**
  * A FilePond field
  */
 class FilePondField extends AbstractUploadField
 {
-    const IMAGE_MODE_MIN = "min";
-    const IMAGE_MODE_MAX = "max";
-    const IMAGE_MODE_CROP = "crop";
-    const IMAGE_MODE_RESIZE = "resize";
-    const IMAGE_MODE_CROP_RESIZE = "crop_resize";
-    const DEFAULT_POSTER_HEIGHT = 264;
-    const DEFAULT_POSTER_WIDTH = 352;
+    public const IMAGE_MODE_MIN = "min";
+    public const IMAGE_MODE_MAX = "max";
+    public const IMAGE_MODE_CROP = "crop";
+    public const IMAGE_MODE_RESIZE = "resize";
+    public const IMAGE_MODE_CROP_RESIZE = "crop_resize";
+    public const DEFAULT_POSTER_HEIGHT = 264;
+    public const DEFAULT_POSTER_WIDTH = 352;
 
     /**
      * @config
@@ -126,7 +126,7 @@ class FilePondField extends AbstractUploadField
      * @param string $title The field label.
      * @param SS_List $items Items assigned to this field
      */
-    public function __construct($name, $title = null, SS_List $items = null)
+    public function __construct($name, $title = null, ?SS_List $items = null)
     {
         parent::__construct($name, $title, $items);
 
@@ -591,15 +591,14 @@ class FilePondField extends AbstractUploadField
     public function getExistingUploadsData()
     {
         // Both Value() & dataValue() seem to return an array eg: ['Files' => [258, 259, 257]]
-        $fileIDarray = $this->Value() ?: ['Files' => []];
+        $fileIDarray = $this->getValue() ?: ['Files' => []];
         if (!isset($fileIDarray['Files']) || !count($fileIDarray['Files'])) {
             return [];
         }
 
         $existingUploads = [];
         foreach ($fileIDarray['Files'] as $fileID) {
-            /** @var File|null $file */
-            $file = File::get()->byID($fileID);
+            $file = $this->getFileByID($fileID);
             if (!$file) {
                 continue;
             }
@@ -665,7 +664,8 @@ class FilePondField extends AbstractUploadField
     public static function Requirements()
     {
         // It includes css styles already
-        Requirements::javascript('lekoala/silverstripe-filepond: javascript/filepond-input.min.js');
+        Requirements::javascript('lekoala/silverstripe-filepond: client/filepond-input.min.js');
+        Requirements::css('lekoala/silverstripe-filepond: client/filepond.css');
     }
 
     public function getAttributes()
@@ -817,7 +817,8 @@ class FilePondField extends AbstractUploadField
      * 5 client submits the FilePond parent form containing the hidden input field with the unique id
      * 6 server uses the unique id to move tmp/12345/my-file.jpg to its final location and remove the tmp/12345 folder
      *
-     * Along with the file object, FilePond also sends the file metadata to the server, both these objects are given the same name.
+     * Along with the file object, FilePond also sends the file metadata to the server,
+     * both these objects are given the same name.
      *
      * @param HTTPRequest $request
      * @return HTTPResponse
@@ -880,7 +881,8 @@ class FilePondField extends AbstractUploadField
         $id = $request->getVar('patch');
 
         // FilePond will send a POST request (without file) to start a chunked transfer,
-        // expecting to receive a unique transfer id in the response body, it'll add the Upload-Length header to this request.
+        // expecting to receive a unique transfer id in the response body,
+        // it'll add the Upload-Length header to this request.
         if ($method == "POST") {
             // Initial post payload doesn't contain name
             // It would be better to return some kind of random token instead
@@ -1045,7 +1047,7 @@ class FilePondField extends AbstractUploadField
         if (!in_array($fileID, $this->getTrackedIDs())) {
             return $this->httpError(400, "Invalid ID");
         }
-        $file = File::get()->byID($fileID);
+        $file = $this->getFileByID($fileID);
         if (!$file->IsTemporary) {
             return $this->httpError(400, "Invalid file");
         }

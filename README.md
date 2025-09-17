@@ -231,7 +231,9 @@ This module is kindly sponsored by [RESTRUCT](restruct.nl)
 
 ## Compatibility
 
-Tested with 4.5 to 4.13 but should work on any 4.x projects
+Tested with ^6
+
+For v4/v5, use previous branch
 
 ## Maintainer
 

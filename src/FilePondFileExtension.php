@@ -5,13 +5,13 @@ namespace LeKoala\FilePond;
 use SilverStripe\Assets\File;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\DataExtension;
 use SilverStripe\AssetAdmin\Controller\AssetAdmin;
+use SilverStripe\Core\Extension;
 
 /**
  * @property File $owner
  */
-class FilePondFileExtension extends DataExtension
+class FilePondFileExtension extends Extension
 {
     /**
      * @var array<string,string>

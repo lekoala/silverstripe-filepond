@@ -153,7 +153,7 @@ trait ImprovedUploader
         $replacedName = str_replace($search, $replace, $pattern);
 
         // Ensure end result is valid
-        $filter = new FileNameFilter;
+        $filter = new FileNameFilter();
         $replacedName = $filter->filter($replacedName);
 
         return $replacedName;
@@ -212,7 +212,7 @@ trait ImprovedUploader
      */
     protected function getFileByID($ID)
     {
-        return File::get()->byID($ID);
+        return File::get_by_id($ID);
     }
 
     /**
